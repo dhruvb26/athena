@@ -16,6 +16,9 @@ struct ContentView: View {
                 Text("Welcome")
                     .font(.title)
                     .fontWeight(.medium)
+                Button(action: authVM.signOut){
+                    Text("Sign out")
+                }
             } else {
                 SignUpOrSignInView()
             }
