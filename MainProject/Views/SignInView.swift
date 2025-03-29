@@ -13,23 +13,45 @@ struct SignInView: View {
     @State private var password = ""
     @State private var errorMessage: String?
     @State private var isSignedIn = false
+    @State private var isPasswordVisible = false
 
     var body: some View {
         
-        
-        VStack {
+        VStack(spacing:10) {
             TextField("Email", text: $email)
             .padding()
             .background(.ultraThinMaterial)
             .cornerRadius(8)
             .padding(.horizontal,15)
             .autocapitalization(.none)
-
-            SecureField("Password", text: $password)
-            .padding()
-            .background(.ultraThinMaterial)
-            .cornerRadius(8)
-            .padding(.horizontal,15)
+            
+            HStack(spacing:0){
+                
+                if isPasswordVisible{
+                    TextField("Password", text: $password)
+                        .padding()
+                        .background(.ultraThinMaterial)
+                        .cornerRadius(8)
+                        .padding(.horizontal,15)
+                        .autocapitalization(.none)
+                } else {
+                    SecureField("Password", text: $password)
+                        .padding()
+                        .background(.ultraThinMaterial)
+                        .cornerRadius(8)
+                        .padding(.horizontal,15)
+                        .autocapitalization(.none)
+                }
+                
+                Button(action: {
+                    isPasswordVisible.toggle()
+                }) {
+                    Image(systemName: isPasswordVisible ? "eye.slash" : "eye")
+                               .foregroundColor(.gray)
+                               .padding(.trailing, 25)
+                }
+            }
+            
 
             if let errorMessage = errorMessage {
                 Text(errorMessage)
@@ -91,13 +113,6 @@ struct SignInView: View {
                 .shadow(color: Color(UIColor.systemGray).opacity(0.5), radius: 1, x: 0, y: 1)
             }
             .padding(15)
-             
-            HStack{
-                Text("Don't already have an account?")
-                    .font(.callout)
-                    .foregroundStyle(Color(UIColor.systemGray))
-            }
-
         }
         .padding()
         .fullScreenCover(isPresented: $isSignedIn) {

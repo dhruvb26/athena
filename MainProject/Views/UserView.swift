@@ -14,7 +14,7 @@ struct UserView: View {
         if let user = authVM.user {
             Text("Welcome, \(user.email ?? "Unknown")")
         } else {
-            Text("Not signed in")
+            Text("Not signed in.")
         }
     }
 }
