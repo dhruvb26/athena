@@ -14,30 +14,31 @@ struct SignUpView: View {
     @State private var errorMessage: String?
     @State private var showSuccessAlert = false
     @State private var isPasswordVisible = false
+    @State private var isConfirmPassWordVisible = false
 
     var body: some View {
-        ZStack {
             VStack(spacing:10) {
                 TextField("Email", text: $email)
                 .padding()
-                .background(.ultraThinMaterial)
+                .background(Color.white)
                 .cornerRadius(8)
                 .padding(.horizontal,15)
                 .autocapitalization(.none)
+                
 
                 HStack(spacing:0){
                     
                     if isPasswordVisible{
                         TextField("Password", text: $password)
                             .padding()
-                            .background(.ultraThinMaterial)
+                            .background(Color.white)
                             .cornerRadius(8)
                             .padding(.horizontal,15)
                             .autocapitalization(.none)
                     } else {
                         SecureField("Password", text: $password)
                             .padding()
-                            .background(.ultraThinMaterial)
+                            .background(Color.white)
                             .cornerRadius(8)
                             .padding(.horizontal,15)
                             .autocapitalization(.none)
@@ -47,18 +48,29 @@ struct SignUpView: View {
                         isPasswordVisible.toggle()
                     }) {
                         Image(systemName: isPasswordVisible ? "eye.slash" : "eye")
-                                   .foregroundColor(.gray)
+                                   .foregroundColor(.white)
                                    .padding(.trailing, 25)
                     }
                 }
                 
                 if !password.isEmpty{
                     
-                    SecureField("Confirm Password", text: $confirmPassword)
-                        .padding()
-                        .background(.ultraThinMaterial)
-                        .cornerRadius(8)
-                        .padding(.horizontal,15)
+                    HStack(spacing:0){
+                        
+                        SecureField("Confirm Password", text: $confirmPassword)
+                            .padding()
+                            .background(Color.white)
+                            .cornerRadius(8)
+                            .padding(.horizontal,15)
+                        
+                        Button(action: {
+                            isConfirmPassWordVisible.toggle()
+                        }) {
+                            Image(systemName: isConfirmPassWordVisible ? "eye.slash" : "eye")
+                                       .foregroundColor(.white)
+                                       .padding(.trailing, 25)
+                        }
+                    }
                 }
            
      
@@ -82,27 +94,9 @@ struct SignUpView: View {
                 .padding(15)
                 
                 Text("Or")
-                .foregroundStyle(Color(UIColor.systemGray))
+                    .foregroundStyle(Color.white)
 
                 VStack{
-                    
-                    Button(action: signUp) {
-                        HStack(spacing: 10) {
-                            Image("AppleDark")
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 24, height: 24)
-                            
-                            Text("Sign Up with Apple")
-                                .foregroundStyle(.white)
-                                .fontWeight(.semibold)
-                        }
-                        .padding(12)
-                        .frame(maxWidth: .infinity)
-                        .background(Color.black)
-                        .cornerRadius(8)
-                    }
-                    
                     Button(action: signUp) {
                         HStack(spacing: 10) {
                             Image("Google")
@@ -119,14 +113,14 @@ struct SignUpView: View {
                         .background(Color.white)
                         .cornerRadius(8)
                     }
-                    .shadow(color: Color(UIColor.systemGray).opacity(0.5), radius: 1, x: 0, y: 1)
+                   
                 }
                 .padding(15)
             }
             .padding()
-        }
+        
         .alert(isPresented: $showSuccessAlert) {
-            Alert(title: Text("Sign Up Successful"),
+            Alert(title: Text("Successful"),
                   message: Text("Your account has been created."),
                   dismissButton: .default(Text("OK")))
         }
