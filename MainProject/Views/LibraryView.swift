@@ -2,20 +2,24 @@
 //  LibraryView.swift
 //  MainProject
 //
-//  Created by Kanav Gupta on 3/29/25.
+//  Created by Kanav Gupta & Dhruv Bansal on 3/29/25.
 //
 
 import SwiftUI
 
 struct LibraryView: View {
-    @State private var subjects = ["CSE 335", "MTH 241"]
     @State private var searchText = ""
+    @State private var courses = exampleCourses
 
-    var filteredSubjects: [String] {
+    var filteredCourses: [Course] {
         if searchText.isEmpty {
-            return subjects
+            return courses
         } else {
-            return subjects.filter { $0.localizedCaseInsensitiveContains(searchText) }
+            return courses.filter {
+                $0.title.localizedCaseInsensitiveContains(searchText) ||
+                $0.description.localizedCaseInsensitiveContains(searchText) ||
+                $0.author.localizedCaseInsensitiveContains(searchText)
+            }
         }
     }
 
@@ -24,50 +28,47 @@ struct LibraryView: View {
             VStack {
                 SearchBar(text: $searchText)
                 
-                ScrollView {
-                    VStack(spacing: 15) {
-                        ForEach(filteredSubjects, id: \.self) { subject in
-                            SubjectCard(subject: subject)
-                            .buttonStyle(PlainButtonStyle())
+                List {
+                    ForEach(filteredCourses) { course in
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(course.title)
+                                .font(.headline)
+                            Text(course.description)
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            Text("by \(course.author)")
+                                .font(.caption)
+                                .foregroundColor(.gray)
                         }
+                        .padding(.vertical, 8)
                     }
-                    .padding()
+                    .onDelete(perform: deleteCourse)
                 }
             }
-            .navigationTitle("📚 My Subjects")
+            .navigationTitle("📚 My Courses")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {
+                        print("Add course tapped")
+                    }) {
+                        Image(systemName: "plus")
+                    }
+                }
+
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    EditButton()
+                }
+            }
         }
+    }
+
+    private func deleteCourse(at offsets: IndexSet) {
+        courses.remove(atOffsets: offsets)
     }
 }
 
-struct SubjectCard: View {
-    var subject: String
-    
-    var body: some View {
-        HStack {
-            Image(systemName: "folder")
-                .foregroundColor(.white)
-                .padding()
-                .background(Circle().fill(Color.blue.opacity(0.8)))
-            
-            Text(subject)
-                .font(.title3)
-                .fontWeight(.semibold)
-                .foregroundColor(.primary)
-
-            Spacer()
-            
-            Image(systemName: "chevron.right")
-                .foregroundColor(.gray)
-        }
-        .padding()
-        .background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemGray6)))
-        .shadow(color: .gray.opacity(0.2), radius: 5, x: 0, y: 3)
-    }
-
-}
-
-
-
+// SearchBar remains unchanged
 struct SearchBar: View {
     @Binding var text: String
 
@@ -76,7 +77,7 @@ struct SearchBar: View {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(.gray)
 
-            TextField("Search subjects...", text: $text)
+            TextField("Search courses...", text: $text)
                 .textFieldStyle(PlainTextFieldStyle())
                 .autocapitalization(.none)
 
@@ -90,55 +91,6 @@ struct SearchBar: View {
         .padding(10)
         .background(RoundedRectangle(cornerRadius: 10).fill(Color(.systemGray6)))
         .padding(.horizontal)
-    }
-}
-
-=======
-//  Created by Dhruv Bansal on 3/29/25.
-//
-import SwiftUI
-
-struct LibraryView: View {
-    @State private var courses = exampleCourses
-
-    var body: some View {
-        NavigationView {
-            List {
-                ForEach(courses) { course in
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(course.title)
-                            .font(.headline)
-                        Text(course.description)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                        Text("by \(course.author)")
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                    }
-                    .padding(.vertical, 8)
-                }
-                .onDelete(perform: deleteCourse)
-            }
-            .navigationTitle("Courses")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: {
-                        print("Add course tapped")
-                    }) {
-                        Image(systemName: "plus")
-                    }
-                }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-            }
-        }
-    }
-
-    private func deleteCourse(at offsets: IndexSet) {
-        courses.remove(atOffsets: offsets)
     }
 }
 
