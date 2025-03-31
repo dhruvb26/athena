@@ -24,7 +24,9 @@ struct AddDocModal: View {
                 
                 Section(header: Text("Notification Type")) {
                     Picker("Notification", selection: $selectedNotification) {
-                        ForEach(notificationTypes, id: \..self) { type in
+                        ForEach(notificationTypes, id: \..self)
+                        {
+                            type in
                             Text(type)
                         }
                     }
@@ -43,14 +45,6 @@ struct AddDocModal: View {
                 }
             }
             .navigationTitle("Add Document")
-            .fileImporter(isPresented: $showFileImporter, allowedContentTypes: [.pdf]) { result in
-                switch result {
-                case .success(let url):
-                    fileURL = url
-                case .failure(let error):
-                    print("Error selecting file: \(error.localizedDescription)")
-                }
-            }
         }
     }
 }
