@@ -4,12 +4,12 @@
 //
 //  Created by Kanav Gupta & Dhruv Bansal on 3/29/25.
 //
-
 import SwiftUI
 
 struct LibraryView: View {
     @State private var searchText = ""
     @State private var courses = exampleCourses
+    @State private var showingAddModal = false
 
     var filteredCourses: [Course] {
         if searchText.isEmpty {
@@ -45,12 +45,12 @@ struct LibraryView: View {
                     .onDelete(perform: deleteCourse)
                 }
             }
-            .navigationTitle("📚 My Courses")
+            .navigationTitle("My Courses")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: {
-                        print("Add course tapped")
+                        showingAddModal = true
                     }) {
                         Image(systemName: "plus")
                     }
@@ -59,6 +59,9 @@ struct LibraryView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     EditButton()
                 }
+            }
+            .sheet(isPresented: $showingAddModal) {
+                AddDocModal()
             }
         }
     }
@@ -93,6 +96,7 @@ struct SearchBar: View {
         .padding(.horizontal)
     }
 }
+
 
 #Preview {
     LibraryView()

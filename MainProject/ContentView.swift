@@ -13,12 +13,7 @@ struct ContentView: View {
     var body: some View {
         VStack {
             if let _ = authVM.user {
-                Text("Welcome")
-                    .font(.title)
-                    .fontWeight(.medium)
-                Button(action: authVM.signOut){
-                    Text("Sign out")
-                }
+                LibraryView()
             } else {
                 SignUpOrSignInView()
             }
