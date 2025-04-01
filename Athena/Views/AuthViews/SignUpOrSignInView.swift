@@ -33,14 +33,15 @@ struct SignUpOrSignInView: View {
                 
                 HStack(spacing:0){
                     Text(isSignUp ? "Already have an account? " : "Don't have an account? ")
-                        .foregroundStyle(Color.white)
+                        .foregroundStyle(.primary)
                     Button {
                         isSignUp.toggle()
                     } label: {
                         Text(isSignUp ? "Sign in" : "Sign up")
-                            .foregroundStyle(Color.white)
+                            .foregroundStyle(.primary)
                             .fontWeight(.medium)
                     }
+                    .buttonStyle(PlainButtonStyle())
                 }
             }
         }

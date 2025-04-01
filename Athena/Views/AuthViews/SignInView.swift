@@ -78,7 +78,7 @@ struct SignInView: View {
                         .aspectRatio(contentMode: .fit)
                         .frame(width: 24, height: 24)
                     
-                    Text("Sign Up with Google")
+                    Text("Sign In with Google")
                         .foregroundStyle(.primary)
                         .fontWeight(.semibold)
                 }
