@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
 enum Difficulty: String, Codable {
     case easy
@@ -20,7 +21,7 @@ enum NotificationType: String, Codable {
 }
 
 struct Course: Identifiable, Codable {
-    var id = UUID()
+    @DocumentID var docID: String?
     var name: String
     var code: String
     var icon: String?
@@ -28,8 +29,11 @@ struct Course: Identifiable, Codable {
     var notificationType: NotificationType
     var difficulty: Difficulty?
     var documents: [Document]
+    
+    var id: String {
+            return docID ?? UUID().uuidString
+        }
 }
-
 
 let exampleCourses: [Course] = [
     Course(

@@ -7,6 +7,7 @@
 
 import SwiftUI
 import FirebaseCore
+import FirebaseFirestore
 import GoogleSignIn
 
 class AppDelegate: NSObject, UIApplicationDelegate {
@@ -22,14 +23,24 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     }
 }
 
+final class FirestoreManager: ObservableObject {
+    let db: Firestore
+    
+    init() {
+        self.db = Firestore.firestore()
+    }
+}
+
 @main
 struct MainProjectApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
-    
+    @StateObject var firestoreManager = FirestoreManager() // Initialize FirestoreManager
+
     var body: some Scene {
         WindowGroup {
             NavigationView {
                 ContentView()
+                    .environmentObject(firestoreManager) // Inject into environment
             }
         }
     }
