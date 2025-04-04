@@ -6,6 +6,7 @@
 //
 
 import FirebaseFirestore
+import FirebaseAuth
 import Foundation
 import SwiftUI
 
@@ -21,6 +22,10 @@ class LibraryViewModel: ObservableObject {
         Firestore.firestore()
     }
 
+    private var currentUserId: String? {
+        Auth.auth().currentUser?.uid
+    }
+
     @Published var firestoreCourses: [Course] = []
 
     enum GroupingOption: String, CaseIterable, Identifiable {
@@ -32,7 +37,33 @@ class LibraryViewModel: ObservableObject {
     init() {
         Task {
             await fetchCourses()
+            setupFirestoreListener()
         }
+    }
+
+    private func setupFirestoreListener() {
+        guard let userId = currentUserId else { return }
+        
+        db.collection("courses")
+            .whereField("userId", isEqualTo: userId)
+            .addSnapshotListener { [weak self] snapshot, error in
+                guard let self = self else { return }
+                
+                if let error = error {
+                    print("🔥 Error listening for course updates: \(error.localizedDescription)")
+                    return
+                }
+                
+                guard let snapshot = snapshot else { return }
+                
+                do {
+                    self.firestoreCourses = try snapshot.documents.compactMap {
+                        try $0.data(as: Course.self)
+                    }
+                } catch {
+                    print("🔥 Error decoding courses: \(error.localizedDescription)")
+                }
+            }
     }
 
     var filteredCourses: [Course] {
@@ -67,8 +98,13 @@ class LibraryViewModel: ObservableObject {
     }
 
     func fetchCourses() async {
+        guard let userId = currentUserId else { return }
+        
         do {
-            let snapshot = try await db.collection("courses").getDocuments()
+            let snapshot = try await db.collection("courses")
+                .whereField("userId", isEqualTo: userId)
+                .getDocuments()
+            
             firestoreCourses = try snapshot.documents.compactMap {
                 try $0.data(as: Course.self)
             }

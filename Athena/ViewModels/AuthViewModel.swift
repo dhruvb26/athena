@@ -32,7 +32,7 @@ class AuthViewModel: ObservableObject {
     func getAuthUser() {
         user = Auth.auth().currentUser
     }
-
+    
     func signOut() {
         do {
             try Auth.auth().signOut()

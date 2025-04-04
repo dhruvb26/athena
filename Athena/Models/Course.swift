@@ -29,6 +29,7 @@ struct Course: Identifiable, Codable {
     var notificationType: NotificationType
     var difficulty: Difficulty?
     var documents: [Document]
+    var userId: String
 
     var id: String {
         docID ?? UUID().uuidString
@@ -53,6 +54,7 @@ let exampleCourses: [Course] = [
                 url: "https://example.com/assignment1.pdf",
                 dateAdded: Date()
             ),
-        ]
+        ],
+        userId: "example_user_id"
     ),
 ]

@@ -7,6 +7,7 @@
 
 import FirebaseFirestore
 import FirebaseStorage
+import FirebaseAuth
 import Foundation
 import SwiftUI
 
@@ -16,6 +17,10 @@ class CourseAddViewModel: ObservableObject {
 
     private let storageRef = Storage.storage().reference()
     private let firestore = Firestore.firestore()
+    
+    private var currentUserId: String? {
+        Auth.auth().currentUser?.uid
+    }
 
     func uploadCourse(
         name: String,
@@ -27,18 +32,23 @@ class CourseAddViewModel: ObservableObject {
         selectedFileURL: URL?,
         completion: @escaping () -> Void
     ) {
+        guard let userId = currentUserId else {
+            uploadError = NSError(domain: "Auth", code: 1, userInfo: [NSLocalizedDescriptionKey: "User not signed in"])
+            return
+        }
+
         if let fileURL = selectedFileURL {
             uploadWithDocument(
                 fileURL: fileURL,
                 title: documentTitle,
-                courseData: (name, code, semester, notificationType, difficulty),
+                courseData: (name, code, semester, notificationType, difficulty, userId),
                 completion: completion
             )
         } else {
             saveCourseToFirestore(
                 name: name, code: code, semester: semester,
                 notificationType: notificationType, difficulty: difficulty,
-                document: nil,
+                document: nil, userId: userId,
                 completion: completion
             )
         }
@@ -47,7 +57,7 @@ class CourseAddViewModel: ObservableObject {
     private func uploadWithDocument(
         fileURL: URL,
         title: String,
-        courseData: (String, String, String, NotificationType, Difficulty?),
+        courseData: (String, String, String, NotificationType, Difficulty?, String),
         completion: @escaping () -> Void
     ) {
         isUploading = true
@@ -71,7 +81,7 @@ class CourseAddViewModel: ObservableObject {
                     self.saveCourseToFirestore(
                         name: courseData.0, code: courseData.1, semester: courseData.2,
                         notificationType: courseData.3, difficulty: courseData.4,
-                        document: nil,
+                        document: nil, userId: courseData.5,
                         completion: completion
                     )
                     return
@@ -83,7 +93,7 @@ class CourseAddViewModel: ObservableObject {
                         self.saveCourseToFirestore(
                             name: courseData.0, code: courseData.1, semester: courseData.2,
                             notificationType: courseData.3, difficulty: courseData.4,
-                            document: nil,
+                            document: nil, userId: courseData.5,
                             completion: completion
                         )
                         return
@@ -93,7 +103,7 @@ class CourseAddViewModel: ObservableObject {
                     self.saveCourseToFirestore(
                         name: courseData.0, code: courseData.1, semester: courseData.2,
                         notificationType: courseData.3, difficulty: courseData.4,
-                        document: document,
+                        document: document, userId: courseData.5,
                         completion: completion
                     )
                 }
@@ -112,6 +122,7 @@ class CourseAddViewModel: ObservableObject {
         notificationType: NotificationType,
         difficulty: Difficulty?,
         document: Document?,
+        userId: String,
         completion: @escaping () -> Void
     ) {
         let newCourse = Course(
@@ -120,7 +131,8 @@ class CourseAddViewModel: ObservableObject {
             semester: semester,
             notificationType: notificationType,
             difficulty: difficulty,
-            documents: document != nil ? [document!] : []
+            documents: document != nil ? [document!] : [],
+            userId: userId
         )
 
         do {

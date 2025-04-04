@@ -7,6 +7,7 @@
 
 import FirebaseFirestore
 import FirebaseStorage
+import FirebaseAuth
 import Foundation
 import SwiftUI
 
@@ -18,9 +19,17 @@ class CourseEditViewModel: ObservableObject {
 
     private let firestore = Firestore.firestore()
     private let storage = Storage.storage()
+    
+    private var currentUserId: String? {
+        Auth.auth().currentUser?.uid
+    }
 
     func updateCourse(_ course: Course, name: String, code: String, semester: String, notificationType: NotificationType, difficulty: Difficulty?, completion: @escaping () -> Void) {
         guard let courseId = course.docID else { return }
+        guard let userId = currentUserId, userId == course.userId else {
+            uploadError = NSError(domain: "Auth", code: 1, userInfo: [NSLocalizedDescriptionKey: "Not authorized to edit this course"])
+            return
+        }
 
         let updatedData: [String: Any] = [
             "name": name,
@@ -40,7 +49,11 @@ class CourseEditViewModel: ObservableObject {
     }
 
     func uploadDocument(for course: Course, fileURL: URL, title: String, completion: @escaping () -> Void) {
-        guard course.docID != nil else { return }
+        guard let _ = course.docID else { return }
+        guard let userId = currentUserId, userId == course.userId else {
+            uploadError = NSError(domain: "Auth", code: 1, userInfo: [NSLocalizedDescriptionKey: "Not authorized to edit this course"])
+            return
+        }
 
         isUploading = true
 
@@ -96,6 +109,11 @@ class CourseEditViewModel: ObservableObject {
 
     func deleteDocument(course: Course, document: Document, completion: @escaping () -> Void) {
         guard let courseId = course.docID else { return }
+        guard let userId = currentUserId, userId == course.userId else {
+            uploadError = NSError(domain: "Auth", code: 1, userInfo: [NSLocalizedDescriptionKey: "Not authorized to edit this course"])
+            return
+        }
+
         isDeleting = true
 
         let removeDocRef = {
