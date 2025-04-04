@@ -11,11 +11,8 @@ import FirebaseFirestore
 
 struct CourseDetailView: View {
     let course: Course
-    let storage = Storage.storage()
+    @StateObject private var viewModel = CourseDetailViewModel()
     @State private var isPresentingEditView = false
-    @State private var fileNames: [String] = []
-    @State private var isLoading = true
-    @State private var errorMessage: String? = nil
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -35,23 +32,23 @@ struct CourseDetailView: View {
                 .font(.headline)
                 .padding(.top)
             
-            if isLoading {
+            if viewModel.isLoading {
                 ProgressView()
                     .padding()
-            } else if let error = errorMessage {
+            } else if let error = viewModel.errorMessage {
                 Text(error)
                     .foregroundColor(.red)
                     .padding()
-            } else if fileNames.isEmpty {
+            } else if viewModel.documents.isEmpty {
                 Text("No files found for this course")
                     .foregroundColor(.secondary)
                     .padding()
             } else {
                 List {
-                    ForEach(fileNames, id: \.self) { fileName in
+                    ForEach(viewModel.documents) { document in
                         HStack {
                             Image(systemName: "doc")
-                            Text(fileName)
+                            Text(document.title)
                         }
                     }
                 }
@@ -75,32 +72,7 @@ struct CourseDetailView: View {
             EditCourseView(course: course)
         }
         .task {
-            await loadFiles()
-        }
-    }
-    
-    func loadFiles() async {
-        isLoading = true
-        errorMessage = nil
-        
-//        will have to associate a file with user id, so
-        // path becomes docs/uid
-        
-        let storageReference = storage.reference().child("docs/")
-        
-        do {
-            let result = try await storageReference.listAll()
-            
-            // Update on main thread since we're updating UI state
-            await MainActor.run {
-                fileNames = result.items.map { $0.name }
-                isLoading = false
-            }
-        } catch {
-            await MainActor.run {
-                errorMessage = "Error loading files: \(error.localizedDescription)"
-                isLoading = false
-            }
+            await viewModel.loadDocuments(for: course)
         }
     }
 }
@@ -109,3 +81,4 @@ struct CourseDetailView: View {
     let previewCourses = exampleCourses
     CourseDetailView(course: previewCourses.first!)
 }
+
