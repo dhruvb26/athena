@@ -29,7 +29,7 @@ class CourseDetailViewModel: ObservableObject {
         errorMessage = nil
 
         guard let userId = currentUserId, userId == course.userId else {
-            errorMessage = "Not authorized to view this course's documents"
+            errorMessage = "Not authorized."
             isLoading = false
             return
         }
