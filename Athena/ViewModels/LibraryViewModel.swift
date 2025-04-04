@@ -5,8 +5,8 @@
 //  Created by Dhruv Bansal on 4/3/25.
 //
 
-import FirebaseFirestore
 import FirebaseAuth
+import FirebaseFirestore
 import Foundation
 import SwiftUI
 
@@ -43,21 +43,21 @@ class LibraryViewModel: ObservableObject {
 
     private func setupFirestoreListener() {
         guard let userId = currentUserId else { return }
-        
+
         db.collection("courses")
             .whereField("userId", isEqualTo: userId)
             .addSnapshotListener { [weak self] snapshot, error in
-                guard let self = self else { return }
-                
-                if let error = error {
+                guard let self else { return }
+
+                if let error {
                     print("🔥 Error listening for course updates: \(error.localizedDescription)")
                     return
                 }
-                
-                guard let snapshot = snapshot else { return }
-                
+
+                guard let snapshot else { return }
+
                 do {
-                    self.firestoreCourses = try snapshot.documents.compactMap {
+                    firestoreCourses = try snapshot.documents.compactMap {
                         try $0.data(as: Course.self)
                     }
                 } catch {
@@ -99,12 +99,12 @@ class LibraryViewModel: ObservableObject {
 
     func fetchCourses() async {
         guard let userId = currentUserId else { return }
-        
+
         do {
             let snapshot = try await db.collection("courses")
                 .whereField("userId", isEqualTo: userId)
                 .getDocuments()
-            
+
             firestoreCourses = try snapshot.documents.compactMap {
                 try $0.data(as: Course.self)
             }

@@ -5,9 +5,9 @@
 //  Created by Dhruv Bansal on 4/3/25.
 //
 
+import FirebaseAuth
 import FirebaseFirestore
 import FirebaseStorage
-import FirebaseAuth
 import Foundation
 import SwiftUI
 
@@ -17,7 +17,7 @@ class CourseAddViewModel: ObservableObject {
 
     private let storageRef = Storage.storage().reference()
     private let firestore = Firestore.firestore()
-    
+
     private var currentUserId: String? {
         Auth.auth().currentUser?.uid
     }

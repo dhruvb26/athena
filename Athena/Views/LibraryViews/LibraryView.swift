@@ -29,8 +29,8 @@ struct LibraryView: View {
                     .padding(.horizontal)
 
                     courseListView
-                    
-                    Button("Sign Out"){
+
+                    Button("Sign Out") {
                         auth.signOut()
                     }
 
