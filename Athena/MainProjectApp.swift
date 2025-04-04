@@ -43,8 +43,8 @@ struct MainProjectApp: App {
         WindowGroup {
             NavigationView {
                 ContentView()
-                    .environmentObject(firestoreManager) // Inject into environment
-//                    .environmentObject(authViewModel) // ✅ Inject it here
+                    .environmentObject(firestoreManager)
+                    .environmentObject(authViewModel)
             }
         }
     }

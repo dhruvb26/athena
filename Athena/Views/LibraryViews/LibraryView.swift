@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct LibraryView: View {
+    @EnvironmentObject private var auth: AuthViewModel
     @StateObject private var viewModel = LibraryViewModel()
 
     var body: some View {
@@ -28,6 +29,10 @@ struct LibraryView: View {
                     .padding(.horizontal)
 
                     courseListView
+                    
+                    Button("Sign Out"){
+                        auth.signOut()
+                    }
 
                     addToLibraryButton
                 }
