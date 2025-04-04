@@ -9,12 +9,26 @@ import FirebaseCore
 import FirebaseFirestore
 import GoogleSignIn
 import SwiftUI
+import UserNotifications
 
 class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_: UIApplication,
                      didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool
     {
         FirebaseApp.configure()
+
+        NotificationManager.shared.requestPermission { success, error in
+            if success {
+                print("Notification permission granted.")
+                NotificationManager.shared.scheduleNotification(
+                    title: "Welcome to Athena!",
+                    body: "Thank you for opening the app. Here's your first notification!",
+                    timeInterval: 30
+                )
+            } else if let error {
+                print("Error requesting notification permission: \(error.localizedDescription)")
+            }
+        }
         return true
     }
 

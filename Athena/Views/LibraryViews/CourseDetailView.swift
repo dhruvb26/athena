@@ -5,9 +5,9 @@
 //  Created by Dhruv Bansal on 4/1/25.
 //
 
-import SwiftUI
-import FirebaseStorage
 import FirebaseFirestore
+import FirebaseStorage
+import SwiftUI
 
 struct CourseDetailView: View {
     let course: Course
@@ -25,13 +25,13 @@ struct CourseDetailView: View {
             Text("\(course.semester)")
                 .font(.subheadline)
                 .foregroundStyle(.gray)
-            
+
             Divider()
-            
+
             Text("Course Files")
                 .font(.headline)
                 .padding(.top)
-            
+
             if viewModel.isLoading {
                 ProgressView()
                     .padding()
@@ -54,7 +54,7 @@ struct CourseDetailView: View {
                 }
                 .listStyle(PlainListStyle())
             }
-            
+
             Spacer()
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -81,4 +81,3 @@ struct CourseDetailView: View {
     let previewCourses = exampleCourses
     CourseDetailView(course: previewCourses.first!)
 }
-
