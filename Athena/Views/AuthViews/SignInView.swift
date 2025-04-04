@@ -1,44 +1,43 @@
 //
 //  SignInView.swift
-//  MainProject
+//  Athena
 //
-//  Created by Dhruv Bansal on 3/28/25.
+//  Created by Kanav Gupta on 3/28/25.
 //
 
 import SwiftUI
 
 struct SignInView: View {
-    
     @EnvironmentObject private var auth: AuthViewModel
-    
+
     @State private var email = ""
     @State private var password = ""
     @State private var errorMessage: String?
     @State private var isPasswordVisible = false
-    
+
     var body: some View {
-        VStack(spacing:10) {
+        VStack(spacing: 10) {
             TextField("Email", text: $email)
                 .padding()
                 .cornerRadius(8)
-                .padding(.horizontal,15)
+                .padding(.horizontal, 15)
                 .autocapitalization(.none)
-            
-            HStack(spacing:0){
+
+            HStack(spacing: 0) {
                 if isPasswordVisible {
                     TextField("Password", text: $password)
                         .padding()
                         .cornerRadius(8)
-                        .padding(.horizontal,15)
+                        .padding(.horizontal, 15)
                         .autocapitalization(.none)
                 } else {
                     SecureField("Password", text: $password)
                         .padding()
                         .cornerRadius(8)
-                        .padding(.horizontal,15)
+                        .padding(.horizontal, 15)
                         .autocapitalization(.none)
                 }
-                
+
                 Button(action: {
                     isPasswordVisible.toggle()
                 }) {
@@ -47,17 +46,17 @@ struct SignInView: View {
                         .padding(.trailing, 25)
                 }
             }
-            
-            if let errorMessage = errorMessage {
+
+            if let errorMessage {
                 Text(errorMessage)
                     .foregroundColor(.red)
                     .padding()
             }
-            
+
             Button {
                 Task {
                     if let error = await auth.signInWithEmail(email: email, password: password) {
-                        self.errorMessage = error
+                        errorMessage = error
                     }
                 }
             } label: {
@@ -72,15 +71,13 @@ struct SignInView: View {
             }
             .padding(15)
 
-            
             Text("Or")
                 .foregroundStyle(Color.gray)
-            
-            
+
             Button {
                 Task {
                     if let error = await auth.signInWithGoogle() {
-                        self.errorMessage = error
+                        errorMessage = error
                     }
                 }
             } label: {
@@ -89,7 +86,7 @@ struct SignInView: View {
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(width: 24, height: 24)
-                    
+
                     Text("Sign In with Google")
                         .foregroundStyle(.primary)
                         .fontWeight(.semibold)
@@ -102,7 +99,7 @@ struct SignInView: View {
             .buttonStyle(.plain)
         }
         .padding()
-    }    
+    }
 }
 
 #Preview {

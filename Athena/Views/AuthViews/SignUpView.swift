@@ -1,16 +1,15 @@
 //
 //  SignUpView.swift
-//  MainProject
+//  Athena
 //
-//  Created by Dhruv Bansal on 3/28/25.
+//  Created by Kanav Gupta on 3/28/25.
 //
 
 import SwiftUI
 
 struct SignUpView: View {
-    
     @EnvironmentObject private var auth: AuthViewModel
-    
+
     @State private var email = ""
     @State private var password = ""
     @State private var confirmPassword = ""
@@ -18,34 +17,30 @@ struct SignUpView: View {
     @State private var showSuccessAlert = false
     @State private var isPasswordVisible = false
     @State private var isConfirmPassWordVisible = false
-    
+
     var body: some View {
-        VStack(spacing:10) {
+        VStack(spacing: 10) {
             TextField("Email", text: $email)
                 .padding()
-            
                 .cornerRadius(8)
-                .padding(.horizontal,15)
+                .padding(.horizontal, 15)
                 .autocapitalization(.none)
-            
-            HStack(spacing:0){
-                
-                if isPasswordVisible{
+
+            HStack(spacing: 0) {
+                if isPasswordVisible {
                     TextField("Password", text: $password)
                         .padding()
-                    
                         .cornerRadius(8)
-                        .padding(.horizontal,15)
+                        .padding(.horizontal, 15)
                         .autocapitalization(.none)
                 } else {
                     SecureField("Password", text: $password)
                         .padding()
-                    
                         .cornerRadius(8)
-                        .padding(.horizontal,15)
+                        .padding(.horizontal, 15)
                         .autocapitalization(.none)
                 }
-                
+
                 Button(action: {
                     isPasswordVisible.toggle()
                 }) {
@@ -54,14 +49,14 @@ struct SignUpView: View {
                         .padding(.trailing, 25)
                 }
             }
-            
+
             if !password.isEmpty {
                 HStack(spacing: 0) {
                     SecureField("Confirm Password", text: $confirmPassword)
                         .padding()
                         .cornerRadius(8)
                         .padding(.horizontal, 15)
-                    
+
                     Button(action: {
                         isConfirmPassWordVisible.toggle()
                     }) {
@@ -69,17 +64,15 @@ struct SignUpView: View {
                             .foregroundStyle(Color.gray)
                             .padding(.trailing, 25)
                     }
-                    
                 }
             }
-            
-            
-            if let errorMessage = errorMessage {
+
+            if let errorMessage {
                 Text(errorMessage)
                     .foregroundColor(.red)
                     .padding()
             }
-            
+
             Button {
                 Task {
                     let error = await auth.createUserWithEmail(
@@ -87,10 +80,10 @@ struct SignUpView: View {
                         password: password,
                         confirmPassword: confirmPassword
                     )
-                    if let error = error {
-                        self.errorMessage = error
+                    if let error {
+                        errorMessage = error
                     } else {
-                        self.showSuccessAlert = true
+                        showSuccessAlert = true
                     }
                 }
             } label: {
@@ -105,14 +98,13 @@ struct SignUpView: View {
             }
             .padding(15)
 
-            
             Text("Or")
                 .foregroundStyle(Color.gray)
-            
+
             Button {
                 Task {
                     if let error = await auth.signInWithGoogle() {
-                        self.errorMessage = error
+                        errorMessage = error
                     }
                 }
             } label: {
@@ -132,7 +124,6 @@ struct SignUpView: View {
                 .cornerRadius(8)
             }
             .buttonStyle(.plain)
-            
         }
         .padding()
         .alert(isPresented: $showSuccessAlert) {
@@ -141,7 +132,6 @@ struct SignUpView: View {
                   dismissButton: .default(Text("OK")))
         }
     }
-    
 }
 
 #Preview {

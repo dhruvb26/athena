@@ -16,11 +16,11 @@ struct Document: Identifiable, Codable {
 
 extension Document { // represents the Firestore object
     func firestoreRepresentation() -> [String: Any] {
-        return [
+        [
             "id": id.uuidString,
             "title": title,
             "url": url ?? "",
-            "dateAdded": dateAdded
+            "dateAdded": dateAdded,
         ]
     }
 }

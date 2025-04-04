@@ -1,12 +1,12 @@
 //
 //  Course.swift
-//  MainProject
+//  Athena
 //
-//  Created by Dhruv Bansal on 3/29/25.
+//  Created by Kanav Gupta on 3/29/25.
 //
 
-import Foundation
 import FirebaseFirestore
+import Foundation
 
 enum Difficulty: String, Codable {
     case easy
@@ -29,9 +29,9 @@ struct Course: Identifiable, Codable {
     var notificationType: NotificationType
     var difficulty: Difficulty?
     var documents: [Document]
-    
+
     var id: String {
-        return docID ?? UUID().uuidString
+        docID ?? UUID().uuidString
     }
 }
 
@@ -41,6 +41,7 @@ let exampleCourses: [Course] = [
         code: "CSE335",
         semester: "Spring 2025",
         notificationType: .question,
+        difficulty: .easy,
         documents: [
             Document(
                 title: "Lecture Notes",
@@ -51,8 +52,7 @@ let exampleCourses: [Course] = [
                 title: "Assignment 1",
                 url: "https://example.com/assignment1.pdf",
                 dateAdded: Date()
-            )
+            ),
         ]
-    )
+    ),
 ]
-

@@ -1,37 +1,32 @@
 //
 //  SignUpOrSignInView.swift
-//  MainProject
+//  Athena
 //
-//  Created by Dhruv Bansal on 3/28/25.
+//  Created by Kanav Gupta on 3/28/25.
 //
 
 import SwiftUI
 
 struct SignUpOrSignInView: View {
     @State private var isSignUp = true
-    
+
     var body: some View {
-        
-        ZStack{
+        ZStack {
             VStack {
-                
                 Text("athena")
                     .foregroundStyle(.primary)
                     .font(Font(CustomFont.agaramondProRegular.withSize(40)))
-                
-                
+
                 Spacer()
                     .frame(height: 30)
-                
-                
+
                 if isSignUp {
                     SignUpView()
                 } else {
                     SignInView()
                 }
-                
-                
-                HStack(spacing:0){
+
+                HStack(spacing: 0) {
                     Text(isSignUp ? "Already have an account? " : "Don't have an account? ")
                         .foregroundStyle(.primary)
                     Button {
@@ -45,7 +40,6 @@ struct SignUpOrSignInView: View {
                 }
             }
         }
-        
     }
 }
 

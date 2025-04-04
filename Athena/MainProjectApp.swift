@@ -1,33 +1,35 @@
 //
 //  MainProjectApp.swift
-//  MainProject
+//  Athena
 //
 //  Created by Dhruv Bansal on 3/25/25.
 //
 
-import SwiftUI
 import FirebaseCore
 import FirebaseFirestore
 import GoogleSignIn
+import SwiftUI
 
 class AppDelegate: NSObject, UIApplicationDelegate {
-    func application(_ application: UIApplication,
-                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+    func application(_: UIApplication,
+                     didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool
+    {
         FirebaseApp.configure()
         return true
     }
-    
-    func application(_ app: UIApplication, open url: URL,
-                     options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-        return GIDSignIn.sharedInstance.handle(url)
+
+    func application(_: UIApplication, open url: URL,
+                     options _: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool
+    {
+        GIDSignIn.sharedInstance.handle(url)
     }
 }
 
 final class FirestoreManager: ObservableObject {
     let db: Firestore
-    
+
     init() {
-        self.db = Firestore.firestore()
+        db = Firestore.firestore()
     }
 }
 

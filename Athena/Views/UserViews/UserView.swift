@@ -5,8 +5,8 @@
 //  Created by Dhruv Bansal on 4/1/25.
 //
 
-import SwiftUI
 import FirebaseAuth
+import SwiftUI
 
 struct UserView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
@@ -23,7 +23,7 @@ struct UserView: View {
 
                         Text(user.email ?? "No email available")
                             .font(.headline)
-                        
+
                         Spacer()
 
                         Button {
@@ -32,7 +32,6 @@ struct UserView: View {
                             Text("Sign Out")
                                 .foregroundStyle(Color.secondaryPurple)
                         }
-                        
                     }
                 } else {
                     Text("Not logged in")
