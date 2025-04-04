@@ -21,7 +21,7 @@ enum NotificationType: String, Codable {
 }
 
 struct Course: Identifiable, Codable {
-    @DocumentID var docID: String?
+    @DocumentID var docID: String? // renamed to docID to not conflict with Firestore
     var name: String
     var code: String
     var icon: String?
@@ -31,38 +31,25 @@ struct Course: Identifiable, Codable {
     var documents: [Document]
     
     var id: String {
-            return docID ?? UUID().uuidString
-        }
+        return docID ?? UUID().uuidString
+    }
 }
 
 let exampleCourses: [Course] = [
     Course(
-        name: "Introduction to Swift",
-        code: "SWIFT101",
-        semester: "Fall 2024",
+        name: "Principles of Mobile Computing",
+        code: "CSE335",
+        semester: "Spring 2025",
         notificationType: .question,
         documents: [
             Document(
                 title: "Lecture Notes",
-                url: "These notes cover the basics of Swift programming.",
+                url: "https://example.com/lecturenotes.pdf",
                 dateAdded: Date()
             ),
             Document(
                 title: "Assignment 1",
-                url: "Complete exercises on variables, constants, and control flow.",
-                dateAdded: Date()
-            )
-        ]
-    ),
-    Course(
-        name: "Data Structures",
-        code: "CS102",
-        semester: "Spring 2025",
-        notificationType: .snippet,
-        documents: [
-            Document(
-                title: "Reading Material",
-                url: "Chapters 1-3 from the Data Structures textbook.",
+                url: "https://example.com/assignment1.pdf",
                 dateAdded: Date()
             )
         ]

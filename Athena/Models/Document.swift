@@ -14,8 +14,7 @@ struct Document: Identifiable, Codable {
     var dateAdded: Date
 }
 
-extension Document {
-    /// Returns a dictionary representation for Firestore.
+extension Document { // represents the Firestore object
     func firestoreRepresentation() -> [String: Any] {
         return [
             "id": id.uuidString,

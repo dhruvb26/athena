@@ -6,11 +6,11 @@
 //
 
 import SwiftUI
-import FirebaseAuth
-import FirebaseCore
-import GoogleSignIn
 
 struct SignUpView: View {
+    
+    @EnvironmentObject private var auth: AuthViewModel
+    
     @State private var email = ""
     @State private var password = ""
     @State private var confirmPassword = ""
@@ -80,28 +80,48 @@ struct SignUpView: View {
                     .padding()
             }
             
-            Button(action: signUp) {
+            Button {
+                Task {
+                    let error = await auth.createUserWithEmail(
+                        email: email,
+                        password: password,
+                        confirmPassword: confirmPassword
+                    )
+                    if let error = error {
+                        self.errorMessage = error
+                    } else {
+                        self.showSuccessAlert = true
+                    }
+                }
+            } label: {
                 Text("Sign Up")
                     .frame(maxWidth: .infinity)
-                    .padding(.horizontal,12)
-                    .padding(.vertical,14)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 14)
                     .foregroundStyle(.white)
                     .background(Color.primaryPurple)
                     .cornerRadius(8)
                     .fontWeight(.semibold)
             }
             .padding(15)
+
             
             Text("Or")
                 .foregroundStyle(Color.gray)
             
-            Button(action: signInWithGoogle) {
+            Button {
+                Task {
+                    if let error = await auth.signInWithGoogle() {
+                        self.errorMessage = error
+                    }
+                }
+            } label: {
                 HStack(spacing: 10) {
                     Image("Google")
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(width: 24, height: 24)
-                    
+
                     Text("Sign Up with Google")
                         .foregroundStyle(.primary)
                         .fontWeight(.semibold)
@@ -110,12 +130,11 @@ struct SignUpView: View {
                 .frame(maxWidth: .infinity)
                 .foregroundStyle(.primary)
                 .cornerRadius(8)
-            }.buttonStyle(PlainButtonStyle())
-            
+            }
+            .buttonStyle(.plain)
             
         }
         .padding()
-        
         .alert(isPresented: $showSuccessAlert) {
             Alert(title: Text("Successful"),
                   message: Text("Your account has been created."),
@@ -123,67 +142,6 @@ struct SignUpView: View {
         }
     }
     
-    private func signUp() {
-        errorMessage = nil
-        
-        guard !email.isEmpty, !password.isEmpty else {
-            errorMessage = "Email and password must not be empty."
-            return
-        }
-        
-        guard password == confirmPassword else {
-            errorMessage = "Passwords do not match."
-            return
-        }
-        
-        Auth.auth().createUser(withEmail: email, password: password) { _, error in
-            if let error = error {
-                errorMessage = error.localizedDescription
-            } else {
-                showSuccessAlert = true
-            }
-        }
-    }
-    
-    private func signInWithGoogle() {
-        guard let clientID = FirebaseApp.app()?.options.clientID else {
-            self.errorMessage = "Missing Client ID"
-            return
-        }
-        
-        let config = GIDConfiguration(clientID: clientID)
-        GIDSignIn.sharedInstance.configuration = config
-        
-        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let rootViewController = windowScene.windows.first?.rootViewController else {
-            self.errorMessage = "Unable to access root view controller"
-            return
-        }
-        
-        GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController) { result, error in
-            if let error = error {
-                self.errorMessage = "Google Sign-In failed: \(error.localizedDescription)"
-                return
-            }
-            
-            guard let user = result?.user,
-                  let idToken = user.idToken?.tokenString else {
-                self.errorMessage = "Failed to retrieve Google credentials"
-                return
-            }
-            
-            let accessToken = user.accessToken.tokenString
-            let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: accessToken)
-            
-            Auth.auth().signIn(with: credential) { authResult, error in
-                if let error = error {
-                    self.errorMessage = "Firebase Sign-In failed: \(error.localizedDescription)"
-                } else {
-                    print("✅ Firebase user signed in: \(authResult?.user.uid ?? "Unknown")")
-                }
-            }
-        }
-    }
 }
 
 #Preview {
