@@ -17,81 +17,96 @@ struct CourseDetailView: View {
     @State private var showingFilePicker = false
     @State private var selectedFileURL: URL?
     @State private var documentTitle: String = ""
+    @State private var isShowingDocumentSheet = false
 
     var body: some View {
-        VStack(alignment: .leading) {
-            Text(course.name)
-                .font(.headline)
-                .lineLimit(1)
-                .truncationMode(.tail)
+        GeometryReader { geometry in
+            VStack(alignment: .leading, spacing: 0) {
+                // Top section - course info
+                VStack(alignment: .leading) {
+                    Text(course.name)
+                        .font(.headline)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
 
-            Text("\(course.semester)")
-                .font(.subheadline)
-                .foregroundStyle(.gray)
+                    Text("\(course.semester)")
+                        .font(.subheadline)
+                        .foregroundStyle(.gray)
 
-            Spacer()
+                    Spacer()
+                }
+                .frame(height: geometry.size.height * 0.4)
+                .padding(.bottom)
 
-            Text("Course Files")
-                .font(.headline)
-                .padding(.top)
+                // Middle section - course files
+                VStack(alignment: .leading) {
+                    Text("Course Files")
+                        .font(.headline)
 
-            if viewModel.isLoading {
-                ProgressView()
-                    .padding()
-            } else if let error = viewModel.errorMessage {
-                Text(error)
-                    .font(.subheadline)
-                    .foregroundColor(.red)
-            } else if viewModel.documents.isEmpty {
-                Text("No files found for this course.")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-            } else {
-                List {
-                    ForEach(viewModel.documents) { document in
-                        HStack {
-                            Image(systemName: "doc")
-                                .foregroundStyle(.gray)
-                            Text(document.title)
+                    ZStack {
+                        if viewModel.isLoading {
+                            ProgressView()
+                                .padding()
+                        } else if let error = viewModel.errorMessage {
+                            Text(error)
                                 .font(.subheadline)
-                                .foregroundStyle(.gray)
-                        }
-                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                            Button(role: .destructive) {
-                                Task {
-                                    anotherModel.deleteDocument(
-                                        course: course,
-                                        document: document
-                                    ) {
-                                        Task {
-                                            await viewModel.loadDocuments(for: course)
+                                .foregroundColor(.red)
+                        } else if viewModel.documents.isEmpty {
+                            Text("No files found for this course.")
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                        } else {
+                            List {
+                                ForEach(viewModel.documents) { document in
+                                    HStack {
+                                        Image(systemName: "document.fill")
+                                            .foregroundStyle(.gray)
+                                        Text(document.title)
+                                            .font(.subheadline)
+                                            .foregroundStyle(.gray)
+                                    }
+                                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                        Button(role: .destructive) {
+                                            Task {
+                                                anotherModel.deleteDocument(
+                                                    course: course,
+                                                    document: document
+                                                ) {
+                                                    Task {
+                                                        await viewModel.loadDocuments(for: course)
+                                                    }
+                                                }
+                                            }
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
                                         }
                                     }
                                 }
-                            } label: {
-                                Label("Delete", systemImage: "trash")
                             }
+                            .listStyle(.plain)
                         }
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
-                .listStyle(.plain)
-            }
+                .frame(height: geometry.size.height * 0.4)
 
-            Spacer()
+                Spacer()
 
-            Button {
-                showingFilePicker = true
-            } label: {
-                HStack {
-                    Image(systemName: "plus.circle.fill")
-                    Text("Add Document")
+                Button {
+                    showingFilePicker = true
+                } label: {
+                    HStack {
+                        Image(systemName: "plus.circle.fill")
+                        Text("Add Document")
+                    }
+                    .foregroundStyle(Color.secondaryPurple)
+                    .frame(maxWidth: .infinity)
                 }
-                .foregroundStyle(Color.secondaryPurple)
+                .padding()
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding()
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding()
         .navigationTitle("Course Details")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -104,6 +119,60 @@ struct CourseDetailView: View {
         .sheet(isPresented: $isPresentingEditView) {
             EditCourseView(course: course)
         }
+        .sheet(isPresented: $isShowingDocumentSheet) {
+            NavigationView {
+                VStack {
+                    if let fileURL = selectedFileURL {
+                        Form {
+                            Section(header: Text("Document Information")) {
+                                VStack(alignment: .leading) {
+                                    Text(fileURL.lastPathComponent)
+                                        .font(.subheadline)
+                                        .foregroundColor(.gray)
+                                }
+                                TextField("Document Title", text: $documentTitle)
+                            }
+                        }
+                    }
+
+                    Button {
+                        if let fileURL = selectedFileURL {
+                            Task {
+                                anotherModel.uploadDocument(
+                                    for: course,
+                                    fileURL: fileURL,
+                                    title: documentTitle
+                                ) {
+                                    Task {
+                                        await viewModel.loadDocuments(for: course)
+                                    }
+                                }
+                            }
+                            isShowingDocumentSheet = false
+                        }
+                    } label: {
+                        Text("Upload Document")
+                            .frame(maxWidth: .infinity)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 14)
+                            .foregroundStyle(.white)
+                            .background(Color.primaryPurple)
+                            .cornerRadius(8)
+                            .fontWeight(.semibold)
+                    }
+                    .padding(15)
+                }
+                .navigationTitle("Document Details")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button("Cancel") {
+                            isShowingDocumentSheet = false
+                        }
+                    }
+                }
+            }
+        }
         .fileImporter(
             isPresented: $showingFilePicker,
             allowedContentTypes: [.pdf, .plainText, .presentation],
@@ -114,17 +183,7 @@ struct CourseDetailView: View {
                 if let fileURL = urls.first {
                     selectedFileURL = fileURL
                     documentTitle = fileURL.deletingPathExtension().lastPathComponent
-                    Task {
-                        anotherModel.uploadDocument(
-                            for: course,
-                            fileURL: fileURL,
-                            title: documentTitle
-                        ) {
-                            Task {
-                                await viewModel.loadDocuments(for: course)
-                            }
-                        }
-                    }
+                    isShowingDocumentSheet = true
                 }
             case let .failure(error):
                 print("File import failed: \(error)")

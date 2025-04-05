@@ -56,12 +56,14 @@ struct AddCourseView: View {
                         }
 
                         if let fileURL = selectedFileURL {
-                            VStack(alignment: .leading) {
-                                Text(fileURL.lastPathComponent)
-                                    .font(.headline)
-                                    .foregroundColor(.gray)
+                            Section(header: Text("Document Information")) {
+                                VStack(alignment: .leading) {
+                                    Text(fileURL.lastPathComponent)
+                                        .font(.subheadline)
+                                        .foregroundColor(.gray)
+                                }
+                                TextField("Document Title", text: $documentTitle)
                             }
-                            TextField("Document Title", text: $documentTitle)
                         }
                     }
                     .navigationTitle("New Course")
