@@ -12,50 +12,10 @@ class ExampleQuizViewModel: ObservableObject {
     static let shared = ExampleQuizViewModel()
     private let notificationManager = NotificationManager.shared
 
-    private let osQuestions = [
-        (
-            question: "What is a process in Operating Systems?",
-            options: [
-                "A program in execution",
-                "A file on disk",
-                "A network connection",
-                "A hardware component",
-            ],
-            correctAnswer: 0
-        ),
-        (
-            question: "Which scheduling algorithm is non-preemptive?",
-            options: [
-                "Round Robin",
-                "First Come First Served",
-                "Shortest Remaining Time First",
-                "Priority Scheduling",
-            ],
-            correctAnswer: 1
-        ),
-        (
-            question: "What is thrashing in OS?",
-            options: [
-                "CPU overload",
-                "Network congestion",
-                "Excessive page faults",
-                "Disk fragmentation",
-            ],
-            correctAnswer: 2
-        ),
-        (
-            question: "What is the purpose of virtual memory?",
-            options: [
-                "To increase CPU speed",
-                "To extend physical memory using disk space",
-                "To improve network performance",
-                "To optimize file storage",
-            ],
-            correctAnswer: 1
-        ),
-    ]
+    @Published var quizItems: [QuizItem] = []
 
     private init() {
+        quizItems = exampleQuizItems.filter { $0.type == .question }
         setupNotificationCategory()
     }
 
@@ -95,17 +55,22 @@ class ExampleQuizViewModel: ObservableObject {
         notificationManager.registerCategory(category)
     }
 
-    func scheduleQuizNotification() {
-        let randomQuestion = osQuestions.randomElement()!
-        let questionText = randomQuestion.question
-        let options = randomQuestion.options
+    func exampleQuizNotification() {
+        guard let randomQuizItem = quizItems.randomElement(),
+              let options = randomQuizItem.options
+        else {
+            print("No valid quiz items available")
+            return
+        }
+
+        let questionText = randomQuizItem.content
 
         let optionsText = options.enumerated().map { index, option in
             "\(Character(UnicodeScalar(65 + index)!)). \(option)"
         }.joined(separator: "\n")
 
         let content = """
-        OS Quiz Time! 🤓
+        \(randomQuizItem.title) 🤓
 
         \(questionText)
 
@@ -113,7 +78,7 @@ class ExampleQuizViewModel: ObservableObject {
         """
 
         notificationManager.scheduleInteractiveNotification(
-            title: "Test Your OS Knowledge!",
+            title: "Test Your Knowledge!",
             body: content,
             categoryIdentifier: "os_quiz",
             timeInterval: 30,
