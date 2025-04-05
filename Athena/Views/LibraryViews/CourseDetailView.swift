@@ -13,7 +13,6 @@ struct CourseDetailView: View {
     let course: Course
     @StateObject private var viewModel = CourseDetailViewModel()
     @StateObject private var anotherModel = CourseEditViewModel()
-    @StateObject private var quizModel = CourseQuizNotificationViewModel.shared
     @State private var isPresentingEditView = false
     @State private var showingFilePicker = false
     @State private var selectedFileURL: URL?
@@ -146,7 +145,6 @@ struct CourseDetailView: View {
                                 ) {
                                     Task {
                                         await viewModel.loadDocuments(for: course)
-                                        quizModel.scheduleQuizNotification()
                                     }
                                 }
                             }

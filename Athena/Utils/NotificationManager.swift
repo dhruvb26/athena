@@ -13,7 +13,7 @@ typealias NotificationActionHandler = (UNNotificationResponse) -> Void
 struct NotificationAction {
     let identifier: String
     let title: String
-    let options: UNNotificationActionOptions
+    let options: UNNotificationActionOptions // example: .authenticationRequire, .foreground, .destructive
     let handler: NotificationActionHandler
 }
 

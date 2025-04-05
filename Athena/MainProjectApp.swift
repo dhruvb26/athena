@@ -17,20 +17,14 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         FirebaseApp.configure()
-        
-//        Notification for welcome!
-//        NotificationManager.shared.requestPermission { success, error in
-//            if success {
-//                print("Notification permission granted.")
-//                NotificationManager.shared.scheduleBasicNotification(
-//                    title: "Welcome to Athena!",
-//                    body: "Thank you for opening the app. Here's your first notification!",
-//                    timeInterval: 30
-//                )
-//            } else if let error {
-//                print("Error requesting notification permission: \(error.localizedDescription)")
-//            }
-//        }
+
+        NotificationManager.shared.requestPermission { success, error in
+            if success {
+                print("Notification permission granted.")
+            } else if let error {
+                print("Error requesting notification permission: \(error.localizedDescription)")
+            }
+        }
         return true
     }
 
