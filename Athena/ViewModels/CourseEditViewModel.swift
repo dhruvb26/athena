@@ -24,10 +24,17 @@ class CourseEditViewModel: ObservableObject {
         Auth.auth().currentUser?.uid
     }
 
-    func updateCourse(_ course: Course, name: String, code: String, semester: String, notificationType: NotificationType, difficulty: Difficulty?, completion: @escaping () -> Void) {
+    func updateCourse(
+        _ course: Course, name: String, code: String, semester: String,
+        notificationType: NotificationType, difficulty: Difficulty?,
+        completion: @escaping () -> Void
+    ) {
         guard let courseId = course.docID else { return }
         guard let userId = currentUserId, userId == course.userId else {
-            uploadError = NSError(domain: "Auth", code: 1, userInfo: [NSLocalizedDescriptionKey: "Not authorized to edit this course"])
+            uploadError = NSError(
+                domain: "Auth", code: 1,
+                userInfo: [NSLocalizedDescriptionKey: "Not authorized to edit this course"]
+            )
             return
         }
 
@@ -48,17 +55,25 @@ class CourseEditViewModel: ObservableObject {
         }
     }
 
-    func uploadDocument(for course: Course, fileURL: URL, title: String, completion: @escaping () -> Void) {
-        guard let _ = course.docID else { return }
+    func uploadDocument(
+        for course: Course, fileURL: URL, title: String, completion: @escaping () -> Void
+    ) {
+        guard course.docID != nil else { return }
         guard let userId = currentUserId, userId == course.userId else {
-            uploadError = NSError(domain: "Auth", code: 1, userInfo: [NSLocalizedDescriptionKey: "Not authorized to edit this course"])
+            uploadError = NSError(
+                domain: "Auth", code: 1,
+                userInfo: [NSLocalizedDescriptionKey: "Not authorized to edit this course"]
+            )
             return
         }
 
         isUploading = true
 
         guard fileURL.startAccessingSecurityScopedResource() else {
-            uploadError = NSError(domain: "Access", code: 1, userInfo: [NSLocalizedDescriptionKey: "Can't access file"])
+            uploadError = NSError(
+                domain: "Access", code: 1,
+                userInfo: [NSLocalizedDescriptionKey: "Can't access file"]
+            )
             isUploading = false
             return
         }
@@ -83,8 +98,12 @@ class CourseEditViewModel: ObservableObject {
                     }
 
                     guard let url else { return }
-                    let document = Document(title: title, url: url.absoluteString, dateAdded: Date())
-                    self.addDocumentReference(to: course, document: document, completion: completion)
+                    let document = Document(
+                        title: title, url: url.absoluteString, dateAdded: Date()
+                    )
+                    self.addDocumentReference(
+                        to: course, document: document, completion: completion
+                    )
                 }
             }
         } catch {
@@ -93,7 +112,9 @@ class CourseEditViewModel: ObservableObject {
         }
     }
 
-    private func addDocumentReference(to course: Course, document: Document, completion: @escaping () -> Void) {
+    private func addDocumentReference(
+        to course: Course, document: Document, completion: @escaping () -> Void
+    ) {
         guard let courseId = course.docID else { return }
 
         firestore.collection("courses").document(courseId).updateData([
@@ -110,37 +131,69 @@ class CourseEditViewModel: ObservableObject {
     func deleteDocument(course: Course, document: Document, completion: @escaping () -> Void) {
         guard let courseId = course.docID else { return }
         guard let userId = currentUserId, userId == course.userId else {
-            uploadError = NSError(domain: "Auth", code: 1, userInfo: [NSLocalizedDescriptionKey: "Not authorized to edit this course"])
+            uploadError = NSError(
+                domain: "Auth", code: 1,
+                userInfo: [NSLocalizedDescriptionKey: "Not authorized to edit this course"]
+            )
             return
         }
 
         isDeleting = true
 
-        let removeDocRef = {
-            self.firestore.collection("courses").document(courseId).updateData([
-                "documents": FieldValue.arrayRemove([document.firestoreRepresentation()]),
-            ]) { error in
+        // First, get the current course document to ensure we're working with the latest data
+        firestore.collection("courses").document(courseId).getDocument {
+            documentSnapshot, error in
+            if let error {
+                self.uploadError = error
                 self.isDeleting = false
-                if let error {
-                    self.uploadError = error
-                } else {
-                    completion()
-                }
+                return
             }
-        }
 
-        if let fileURL = document.url {
-            let ref = storage.reference(forURL: fileURL)
-            ref.delete { error in
-                if let error {
-                    self.uploadError = error
-                    self.isDeleting = false
-                } else {
-                    removeDocRef()
-                }
+            guard let documentSnapshot, documentSnapshot.exists,
+                  var courseData = try? documentSnapshot.data(as: Course.self)
+            else {
+                self.uploadError = NSError(
+                    domain: "Firestore", code: 2,
+                    userInfo: [NSLocalizedDescriptionKey: "Could not retrieve course data"]
+                )
+                self.isDeleting = false
+                return
             }
-        } else {
-            removeDocRef()
+
+            // Filter out the document with matching id
+            courseData.documents = courseData.documents.filter { $0.id != document.id }
+
+            // Update the course with the filtered documents array
+            do {
+                try self.firestore.collection("courses").document(courseId).setData(
+                    from: courseData, merge: true
+                ) { error in
+                    if let error {
+                        self.uploadError = error
+                        self.isDeleting = false
+                        return
+                    }
+
+                    // Now delete the file from storage if URL exists
+                    if let fileURL = document.url {
+                        let ref = self.storage.reference(forURL: fileURL)
+                        ref.delete { error in
+                            self.isDeleting = false
+                            if let error {
+                                self.uploadError = error
+                            } else {
+                                completion()
+                            }
+                        }
+                    } else {
+                        self.isDeleting = false
+                        completion()
+                    }
+                }
+            } catch {
+                self.uploadError = error
+                self.isDeleting = false
+            }
         }
     }
 }
