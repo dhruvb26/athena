@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SignUpOrSignInView: View {
-    @State private var isSignUp = true
+    @State private var isSignUp = false
 
     var body: some View {
         ZStack {

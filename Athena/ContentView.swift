@@ -11,16 +11,31 @@ struct ContentView: View {
     @StateObject var authVM = AuthViewModel()
 
     var body: some View {
-        VStack {
+        Group {
             if let _ = authVM.user {
-                LibraryView()
+                TabView {
+                    LibraryView()
+                        .tabItem {
+                            Label("", systemImage: "tray.circle")
+                        }
+                    FriendsView()
+                        .tabItem {
+                            Label("", systemImage: "person.2.circle")
+                        }
+                    UserView()
+                        .tabItem {
+                            Label("", systemImage: "gear.circle")
+                        }
+                }
             } else {
                 SignUpOrSignInView()
             }
         }
+        .environmentObject(authVM)
     }
 }
 
 #Preview {
     ContentView()
+        .environmentObject(AuthViewModel())
 }

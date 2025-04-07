@@ -30,10 +30,6 @@ struct LibraryView: View {
 
                     courseListView
 
-                    Button("Sign Out") {
-                        auth.signOut()
-                    }
-
                     addToLibraryButton
                 }
                 .navigationTitle("Library")

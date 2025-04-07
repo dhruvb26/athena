@@ -13,36 +13,44 @@ struct UserView: View {
 
     var body: some View {
         NavigationView {
-            VStack {
-                if let user = authViewModel.user {
-                    VStack(spacing: 20) {
-                        Image(systemName: "person.circle.fill")
-                            .resizable()
-                            .frame(width: 50, height: 50)
-                            .foregroundColor(.gray)
+            ZStack {
+                VStack {
+                    if let user = authViewModel.user {
+                        VStack {
+                            HStack {
+                                Text("Email")
+                                    .font(.headline)
 
-                        Text(user.email ?? "No email available")
-                            .font(.headline)
+                                Spacer()
 
-                        Spacer()
+                                Text(user.email ?? "No email available")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.gray)
+                            }
+                            Spacer()
 
-                        Button {
-                            authViewModel.signOut()
-                        } label: {
-                            Text("Sign Out")
+                            Button {
+                                authViewModel.signOut()
+                            } label: {
+                                HStack {
+                                    Image(systemName: "arrow.right.circle.fill")
+                                    Text("Sign Out")
+                                }
                                 .foregroundStyle(Color.secondaryPurple)
+                                .frame(maxWidth: .infinity)
+                            }
+                            .padding()
                         }
+                    } else {
+                        Text("Not logged in")
+                            .font(.subheadline)
+                            .foregroundStyle(.gray)
                     }
-                } else {
-                    Text("Not logged in")
-                        .font(.title3)
-                        .foregroundColor(.secondary)
+                    Spacer()
                 }
-                Spacer()
+                .navigationTitle("Settings")
+                .padding()
             }
-            .navigationTitle("Profile")
-            .navigationBarTitleDisplayMode(.inline)
-            .padding()
         }
     }
 }
