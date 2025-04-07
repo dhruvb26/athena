@@ -14,6 +14,10 @@ struct ContentView: View {
         Group {
             if let _ = authVM.user {
                 TabView {
+                    QuestionView()
+                        .tabItem {
+                            Label("", systemImage: "magnifyingglass")
+                        }
                     LibraryView()
                         .tabItem {
                             Label("", systemImage: "tray.circle")

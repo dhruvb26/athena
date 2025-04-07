@@ -20,9 +20,12 @@
 		<string>AGaramondPro-Bold.otf</string>
 		<string>AGaramondPro-BoldItalic.otf</string>
 	</array>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>remote-notification</string>
-	</array>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAppTransportSecurity</key>
+		<dict/>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 </dict>
 </plist>
