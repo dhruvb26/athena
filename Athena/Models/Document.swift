@@ -11,7 +11,6 @@ struct Document: Identifiable, Codable {
     var id = UUID()
     var title: String
     var url: String?
-    var dateAdded: Date
 }
 
 extension Document { // represents the Firestore object
@@ -20,7 +19,6 @@ extension Document { // represents the Firestore object
             "id": id.uuidString,
             "title": title,
             "url": url ?? "",
-            "dateAdded": dateAdded,
         ]
     }
 }

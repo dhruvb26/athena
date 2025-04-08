@@ -39,7 +39,7 @@ struct QuestionView: View {
                         .padding(.trailing, 10)
                         .padding(12)
                         .background(Color(.systemGray6))
-                        .cornerRadius(20)
+                        .cornerRadius(24)
                         .disabled(viewModel.isLoading)
 
                     Button {
@@ -75,7 +75,7 @@ struct QuestionView: View {
                 //                }
             }
             .background(Color(.systemBackground))
-        }
+        }.padding(.top, 20)
     }
 }
 
@@ -93,7 +93,7 @@ struct MessageBubble: View {
                     .padding(12)
                     .background(message.isUser ? Color.secondaryPurple : .clear)
                     .foregroundColor(message.isUser ? .white : .primary)
-                    .cornerRadius(message.isUser ? 16 : 0)
+                    .cornerRadius(message.isUser ? 20 : 0)
 
                 Text(formatDate(message.date))
                     .font(.caption2)

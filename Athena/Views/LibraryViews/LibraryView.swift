@@ -179,7 +179,6 @@ struct LibraryView: View {
             }
             .foregroundStyle(Color.secondaryPurple)
             .clipShape(Circle())
-            .shadow(radius: 4)
             .padding(.trailing, 20)
             .padding(.bottom, 20)
         }

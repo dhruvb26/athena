@@ -99,7 +99,7 @@ class CourseEditViewModel: ObservableObject {
 
                     guard let url else { return }
                     let document = Document(
-                        title: title, url: url.absoluteString, dateAdded: Date()
+                        title: title, url: url.absoluteString
                     )
                     self.addDocumentReference(
                         to: course, document: document, completion: completion

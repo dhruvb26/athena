@@ -33,7 +33,9 @@ class CourseAddViewModel: ObservableObject {
         completion: @escaping () -> Void
     ) {
         guard let userId = currentUserId else {
-            uploadError = NSError(domain: "Auth", code: 1, userInfo: [NSLocalizedDescriptionKey: "User not signed in"])
+            uploadError = NSError(
+                domain: "Auth", code: 1, userInfo: [NSLocalizedDescriptionKey: "User not signed in"]
+            )
             return
         }
 
@@ -63,7 +65,10 @@ class CourseAddViewModel: ObservableObject {
         isUploading = true
 
         guard fileURL.startAccessingSecurityScopedResource() else {
-            uploadError = NSError(domain: "FileAccessError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Could not access the selected file."])
+            uploadError = NSError(
+                domain: "FileAccessError", code: 1,
+                userInfo: [NSLocalizedDescriptionKey: "Could not access the selected file."]
+            )
             isUploading = false
             return
         }
@@ -99,7 +104,7 @@ class CourseAddViewModel: ObservableObject {
                         return
                     }
 
-                    let document = Document(title: title, url: url?.absoluteString ?? "", dateAdded: Date())
+                    let document = Document(title: title, url: url?.absoluteString ?? "")
                     self.saveCourseToFirestore(
                         name: courseData.0, code: courseData.1, semester: courseData.2,
                         notificationType: courseData.3, difficulty: courseData.4,

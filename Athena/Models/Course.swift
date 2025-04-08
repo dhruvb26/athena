@@ -46,13 +46,11 @@ let exampleCourses: [Course] = [
         documents: [
             Document(
                 title: "Lecture Notes",
-                url: "https://example.com/lecturenotes.pdf",
-                dateAdded: Date()
+                url: "https://example.com/lecturenotes.pdf"
             ),
             Document(
                 title: "Assignment 1",
-                url: "https://example.com/assignment1.pdf",
-                dateAdded: Date()
+                url: "https://example.com/assignment1.pdf"
             ),
         ],
         userId: "example_user_id"
