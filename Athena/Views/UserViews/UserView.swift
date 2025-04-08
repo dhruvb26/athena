@@ -48,7 +48,7 @@ struct UserView: View {
                 Spacer()
             }
             .padding()
-            .padding(.horizontal, 12)
+            .padding(.horizontal, 8)
         }
     }
 }

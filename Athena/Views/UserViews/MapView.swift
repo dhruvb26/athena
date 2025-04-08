@@ -13,19 +13,24 @@ struct MapView: View {
     @State private var searchText = ""
     @State private var cameraPosition = MapCameraPosition.region(
         MKCoordinateRegion(
-            center: CLLocationCoordinate2D(latitude: 33.4484, longitude: -112.0740), // Phoenix coordinates
-            span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
+            center: CLLocationCoordinate2D(latitude: 33.4244, longitude: -111.9283),
+            span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02)
         )
     )
+    @State private var selectedPlace: StudyPlace?
+    let studyLocations = asuStudyLocations
 
     var body: some View {
         Map(position: $cameraPosition) {
-            // Map content can be added here
+            ForEach(studyLocations) { location in
+                Marker(location.name, coordinate: location.coordinate)
+                    .tint(.red)
+            }
         }
         .ignoresSafeArea()
         .searchable(text: $searchText, prompt: "Search for a place")
         .onChange(of: searchText) { _, newValue in
-            if !newValue.isEmpty, newValue.count > 3 {
+            if !newValue.isEmpty, newValue.count > 2 {
                 searchPlaces()
             }
         }
@@ -51,9 +56,27 @@ struct MapView: View {
     }
 
     private func searchPlaces() {
-        // This would typically use MKLocalSearch to find locations
-        // Basic implementation for now
-        print("Searching for: \(searchText)")
+        let searchTextLower = searchText.lowercased()
+        let matchingLocations = studyLocations.filter {
+            $0.name.lowercased().contains(searchTextLower)
+                || $0.description.lowercased().contains(searchTextLower)
+        }
+
+        if let firstMatch = matchingLocations.first {
+            selectedPlace = firstMatch
+
+            let newRegion = MKCoordinateRegion(
+                center: firstMatch.coordinate,
+                span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+            )
+
+            withAnimation {
+                cameraPosition = .region(newRegion)
+            }
+
+        } else {
+            print("No matching locations found for: \(searchText)")
+        }
     }
 }
 

@@ -2,7 +2,7 @@
 //  OpenAIChatViewModel.swift
 //  Athena
 //
-//  Created by Claude on 5/29/25.
+//  Created by Dhruv Bansal on 5/29/25.
 //
 
 import Combine
@@ -14,7 +14,8 @@ class OpenAIChatViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var error: String? = nil
 
-    private let apiKey = "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"
+    private let apiKey =
+        "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"
     private let openAIURL = URL(string: "https://api.openai.com/v1/chat/completions")!
     private var cancellables = Set<AnyCancellable>()
 
@@ -126,7 +127,8 @@ class OpenAIChatViewModel: ObservableObject {
                             }
 
                             if let data = jsonString.data(using: .utf8),
-                               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                               let json = try? JSONSerialization.jsonObject(with: data)
+                               as? [String: Any],
                                let choices = json["choices"] as? [[String: Any]],
                                let choice = choices.first,
                                let delta = choice["delta"] as? [String: Any],
@@ -135,7 +137,8 @@ class OpenAIChatViewModel: ObservableObject {
                                 responseText += content
 
                                 DispatchQueue.main.async {
-                                    if let lastIndex = self.messages.lastIndex(where: { !$0.isUser }) {
+                                    if let lastIndex = self.messages.lastIndex(where: { !$0.isUser }
+                                    ) {
                                         self.messages[lastIndex].content += content
                                     }
                                 }
