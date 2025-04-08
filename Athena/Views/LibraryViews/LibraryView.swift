@@ -12,34 +12,42 @@ struct LibraryView: View {
     @StateObject private var viewModel = LibraryViewModel()
 
     var body: some View {
-        NavigationView {
-            ZStack {
-                VStack(spacing: 0) {
-                    searchBarView
+        ZStack {
+            VStack(spacing: 0) {
+                searchBarView
 
-                    HStack {
-                        Picker("Group by", selection: $viewModel.groupingOption) {
-                            ForEach(LibraryViewModel.GroupingOption.allCases) { option in
-                                Text(option.rawValue).tag(option)
-                            }
+                HStack {
+                    Picker("Group by", selection: $viewModel.groupingOption) {
+                        ForEach(LibraryViewModel.GroupingOption.allCases) { option in
+                            Text(option.rawValue).tag(option)
                         }
-                        .accentColor(.primary)
-                        Spacer()
                     }
-                    .padding(.horizontal)
+                    .accentColor(.primary)
+                    Spacer()
 
-                    courseListView
-
-                    addToLibraryButton
+                    Button {
+                        viewModel.showingAddCourse = true
+                    } label: {
+                        Image(systemName: "plus")
+                            .font(.system(size: 20))
+                    }
+                    .foregroundStyle(Color.secondaryPurple)
+                    .buttonStyle(.plain)
+                    .padding(10)
                 }
-                .navigationTitle("Library")
+                .padding(.horizontal)
+
+                courseListView
             }
         }
+
         .tint(Color.secondaryPurple)
         .sheet(isPresented: $viewModel.showingAddCourse) {
             AddCourseView()
         }
-        .confirmationDialog("Options", isPresented: $viewModel.showingOptions, presenting: viewModel.selectedCourse) { course in
+        .confirmationDialog(
+            "Options", isPresented: $viewModel.showingOptions, presenting: viewModel.selectedCourse
+        ) { course in
             optionsButtons(for: course)
         }
         .onAppear {
@@ -157,8 +165,8 @@ struct LibraryView: View {
                 viewModel.showingAddCourse = true
             } label: {
                 Image(systemName: "plus")
-                    .font(.system(size: 16))
-                    .padding(8)
+                    .font(.system(size: 20))
+                    .padding(.horizontal, 16)
             }
             .buttonStyle(.bordered)
             .clipShape(Circle())

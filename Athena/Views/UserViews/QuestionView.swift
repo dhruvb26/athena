@@ -36,7 +36,8 @@ struct QuestionView: View {
             VStack(spacing: 0) {
                 HStack {
                     TextField("Ask a question.", text: $viewModel.inputMessage)
-                        .padding(10)
+                        .padding(.trailing, 10)
+                        .padding(12)
                         .background(Color(.systemGray6))
                         .cornerRadius(20)
                         .disabled(viewModel.isLoading)
@@ -44,10 +45,11 @@ struct QuestionView: View {
                     Button {
                         viewModel.sendMessage()
                     } label: {
-                        Image(systemName: "paperplane.circle.fill")
-                            .font(.system(size: 30))
+                        Image(systemName: "arrow.up.circle.fill")
+                            .font(.system(size: 34))
                             .foregroundStyle(Color.secondaryPurple)
                     }
+
                     .disabled(
                         viewModel.inputMessage.trimmingCharacters(in: .whitespacesAndNewlines)
                             .isEmpty || viewModel.isLoading)
@@ -55,22 +57,22 @@ struct QuestionView: View {
                 .padding(.horizontal)
                 .padding(.vertical, 10)
 
-//                if viewModel.isLoading {
-//                    HStack {
-//                        Spacer()
-//                        ProgressView()
-//                            .padding(.horizontal)
-//                        Spacer()
-//                    }
-//                    .padding(.vertical, 5)
-//                }
-//
-//                if let error = viewModel.error {
-//                    Text(error)
-//                        .font(.caption)
-//                        .foregroundColor(.red)
-//                        .padding(.horizontal)
-//                }
+                //                if viewModel.isLoading {
+                //                    HStack {
+                //                        Spacer()
+                //                        ProgressView()
+                //                            .padding(.horizontal)
+                //                        Spacer()
+                //                    }
+                //                    .padding(.vertical, 5)
+                //                }
+                //
+                //                if let error = viewModel.error {
+                //                    Text(error)
+                //                        .font(.caption)
+                //                        .foregroundColor(.red)
+                //                        .padding(.horizontal)
+                //                }
             }
             .background(Color(.systemBackground))
         }
@@ -91,9 +93,9 @@ struct MessageBubble: View {
             VStack(alignment: message.isUser ? .trailing : .leading, spacing: 2) {
                 Text(message.content)
                     .padding(12)
-                    .background(message.isUser ? Color.blue : Color(.systemGray5))
+                    .background(message.isUser ? Color.secondaryPurple : .clear)
                     .foregroundColor(message.isUser ? .white : .primary)
-                    .cornerRadius(8)
+                    .cornerRadius(message.isUser ? 16 : 0)
 
                 Text(formatDate(message.date))
                     .font(.caption2)
@@ -115,7 +117,5 @@ struct MessageBubble: View {
 }
 
 #Preview {
-    NavigationView {
-        QuestionView()
-    }
+    QuestionView()
 }

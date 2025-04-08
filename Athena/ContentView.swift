@@ -12,27 +12,43 @@ struct ContentView: View {
 
     var body: some View {
         Group {
-            if let _ = authVM.user {
+            if authVM.user != nil {
                 TabView {
-                    QuestionView()
-                        .tabItem {
-                            Label("", systemImage: "magnifyingglass")
-                        }
-                    LibraryView()
-                        .tabItem {
-                            Label("", systemImage: "tray.circle")
-                        }
-                    FriendsView()
-                        .tabItem {
-                            Label("", systemImage: "person.2.circle")
-                        }
-                    UserView()
-                        .tabItem {
-                            Label("", systemImage: "gear.circle")
-                        }
+                    NavigationView {
+                        QuestionView()
+                            .navigationTitle("Questions")
+                    }
+                    .tabItem {
+                        Label("", systemImage: "magnifyingglass")
+                    }
+                    NavigationView {
+                        LibraryView()
+                            .navigationTitle("Library")
+                    }
+                    .tabItem {
+                        Label("", systemImage: "tray.circle")
+                    }
+                    NavigationView {
+                        FriendsView()
+                            .navigationTitle("Friends")
+                    }
+                    .tabItem {
+                        Label("", systemImage: "person.2.circle")
+                    }
+                    NavigationView {
+                        UserView()
+                            .navigationTitle("User")
+                    }
+                    .tabItem {
+                        Label("", systemImage: "gear.circle")
+                    }
                 }
+                .tint(.secondaryPurple)
             } else {
-                SignUpOrSignInView()
+                NavigationView {
+                    SignUpOrSignInView()
+                        .navigationTitle("Sign Up")
+                }
             }
         }
         .environmentObject(authVM)

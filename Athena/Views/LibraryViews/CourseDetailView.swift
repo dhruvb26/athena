@@ -5,8 +5,6 @@
 //  Created by Dhruv Bansal on 4/1/25.
 //
 
-import FirebaseFirestore
-import FirebaseStorage
 import SwiftUI
 
 struct CourseDetailView: View {
@@ -120,55 +118,51 @@ struct CourseDetailView: View {
             EditCourseView(course: course)
         }
         .sheet(isPresented: $isShowingDocumentSheet) {
-            NavigationView {
-                VStack {
-                    if let fileURL = selectedFileURL {
-                        Form {
-                            Section(header: Text("Document Information")) {
-                                VStack(alignment: .leading) {
-                                    Text(fileURL.lastPathComponent)
-                                        .font(.subheadline)
-                                        .foregroundColor(.gray)
-                                }
-                                TextField("Document Title", text: $documentTitle)
+            VStack {
+                if let fileURL = selectedFileURL {
+                    Form {
+                        Section(header: Text("Document Information")) {
+                            VStack(alignment: .leading) {
+                                Text(fileURL.lastPathComponent)
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
                             }
+                            TextField("Document Title", text: $documentTitle)
                         }
                     }
-
-                    Button {
-                        if let fileURL = selectedFileURL {
-                            Task {
-                                anotherModel.uploadDocument(
-                                    for: course,
-                                    fileURL: fileURL,
-                                    title: documentTitle
-                                ) {
-                                    Task {
-                                        await viewModel.loadDocuments(for: course)
-                                    }
-                                }
-                            }
-                            isShowingDocumentSheet = false
-                        }
-                    } label: {
-                        Text("Upload Document")
-                            .frame(maxWidth: .infinity)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 14)
-                            .foregroundStyle(.white)
-                            .background(Color.primaryPurple)
-                            .cornerRadius(8)
-                            .fontWeight(.semibold)
-                    }
-                    .padding(15)
                 }
-                .navigationTitle("Document Details")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        Button("Cancel") {
-                            isShowingDocumentSheet = false
+
+                Button {
+                    if let fileURL = selectedFileURL {
+                        Task {
+                            anotherModel.uploadDocument(
+                                for: course,
+                                fileURL: fileURL,
+                                title: documentTitle
+                            ) {
+                                Task {
+                                    await viewModel.loadDocuments(for: course)
+                                }
+                            }
                         }
+                        isShowingDocumentSheet = false
+                    }
+                } label: {
+                    Text("Upload Document")
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 14)
+                        .foregroundStyle(.white)
+                        .background(Color.primaryPurple)
+                        .cornerRadius(8)
+                        .fontWeight(.semibold)
+                }
+                .padding(15)
+            }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        isShowingDocumentSheet = false
                     }
                 }
             }

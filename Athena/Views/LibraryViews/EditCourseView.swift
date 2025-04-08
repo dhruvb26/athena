@@ -31,68 +31,65 @@ struct EditCourseView: View {
 
     var body: some View {
         ZStack {
-            NavigationView {
-                VStack(spacing: 10) {
-                    Form {
-                        Section {
-                            TextField("Course Name", text: $name)
-                            TextField("Course Code", text: $code)
-                            TextField("Semester", text: $semester)
-                        }
+            VStack(spacing: 10) {
+                Form {
+                    Section {
+                        TextField("Course Name", text: $name)
+                        TextField("Course Code", text: $code)
+                        TextField("Semester", text: $semester)
+                    }
 
-                        Section {
-                            Picker("Notification Type", selection: $notificationType) {
-                                Text("Question").tag(NotificationType.question)
-                                Text("Snippet").tag(NotificationType.snippet)
-                                Text("Mixed").tag(NotificationType.mixed)
-                            }
-                        }
-
-                        Section {
-                            Picker("Difficulty", selection: $difficulty) {
-                                Text("Easy").tag(Difficulty.easy as Difficulty?)
-                                Text("Medium").tag(Difficulty.medium as Difficulty?)
-                                Text("Hard").tag(Difficulty.hard as Difficulty?)
-                            }
+                    Section {
+                        Picker("Notification Type", selection: $notificationType) {
+                            Text("Question").tag(NotificationType.question)
+                            Text("Snippet").tag(NotificationType.snippet)
+                            Text("Mixed").tag(NotificationType.mixed)
                         }
                     }
 
-                    VStack(spacing: 12) {
-                        Button {
-                            isUploadingOverlayVisible = true
-                            viewModel.updateCourse(
-                                course, name: name, code: code, semester: semester,
-                                notificationType: notificationType, difficulty: difficulty
-                            ) {
-                                isUploadingOverlayVisible = false
-                                dismiss()
-                            }
-                        } label: {
-                            Text("Save")
-                                .frame(maxWidth: .infinity)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 14)
-                                .foregroundStyle(.white)
-                                .background(Color.primaryPurple)
-                                .cornerRadius(8)
-                                .fontWeight(.semibold)
+                    Section {
+                        Picker("Difficulty", selection: $difficulty) {
+                            Text("Easy").tag(Difficulty.easy as Difficulty?)
+                            Text("Medium").tag(Difficulty.medium as Difficulty?)
+                            Text("Hard").tag(Difficulty.hard as Difficulty?)
                         }
-                        .padding(.horizontal)
-                        .disabled(viewModel.isUploading)
                     }
-                    .padding(.bottom)
                 }
-                .navigationTitle("Edit Course")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        Button("Cancel") {
+
+                VStack(spacing: 12) {
+                    Button {
+                        isUploadingOverlayVisible = true
+                        viewModel.updateCourse(
+                            course, name: name, code: code, semester: semester,
+                            notificationType: notificationType, difficulty: difficulty
+                        ) {
+                            isUploadingOverlayVisible = false
                             dismiss()
                         }
+                    } label: {
+                        Text("Save")
+                            .frame(maxWidth: .infinity)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 14)
+                            .foregroundStyle(.white)
+                            .background(Color.primaryPurple)
+                            .cornerRadius(8)
+                            .fontWeight(.semibold)
+                    }
+                    .padding(.horizontal)
+                    .disabled(viewModel.isUploading)
+                }
+                .padding(.bottom)
+            }
+
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
                     }
                 }
-                .tint(Color.secondaryPurple)
             }
+            .tint(Color.secondaryPurple)
 
             if isUploadingOverlayVisible {
                 ZStack {
