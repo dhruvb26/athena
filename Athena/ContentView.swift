@@ -16,7 +16,6 @@ struct ContentView: View {
                 TabView {
                     NavigationView {
                         QuestionView()
-                            .navigationTitle("Questions")
                     }
                     .tabItem {
                         Label("", systemImage: "magnifyingglass")
@@ -29,15 +28,8 @@ struct ContentView: View {
                         Label("", systemImage: "tray.circle")
                     }
                     NavigationView {
-                        FriendsView()
-                            .navigationTitle("Friends")
-                    }
-                    .tabItem {
-                        Label("", systemImage: "person.2.circle")
-                    }
-                    NavigationView {
                         UserView()
-                            .navigationTitle("User")
+                            .navigationTitle("Settings")
                     }
                     .tabItem {
                         Label("", systemImage: "gear.circle")

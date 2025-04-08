@@ -76,8 +76,6 @@ struct QuestionView: View {
             }
             .background(Color(.systemBackground))
         }
-        .navigationTitle("Questions")
-        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

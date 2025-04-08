@@ -10,6 +10,7 @@ import SwiftUI
 struct LibraryView: View {
     @EnvironmentObject private var auth: AuthViewModel
     @StateObject private var viewModel = LibraryViewModel()
+    @State private var showingMapView = false
 
     var body: some View {
         ZStack {
@@ -38,6 +39,8 @@ struct LibraryView: View {
                 .padding(.horizontal)
 
                 courseListView
+
+                showMapButton
             }
         }
 
@@ -53,6 +56,12 @@ struct LibraryView: View {
         .onAppear {
             Task {
                 await viewModel.fetchCourses()
+            }
+        }
+        .navigationTitle("Library")
+        .fullScreenCover(isPresented: $showingMapView) {
+            NavigationView {
+                MapView()
             }
         }
     }
@@ -158,17 +167,17 @@ struct LibraryView: View {
         }
     }
 
-    private var addToLibraryButton: some View {
+    private var showMapButton: some View {
         HStack {
             Spacer()
             Button {
-                viewModel.showingAddCourse = true
+                showingMapView = true
             } label: {
-                Image(systemName: "plus")
-                    .font(.system(size: 20))
+                Image(systemName: "map.circle.fill")
+                    .font(.system(size: 35))
                     .padding(.horizontal, 16)
             }
-            .buttonStyle(.bordered)
+            .foregroundStyle(Color.secondaryPurple)
             .clipShape(Circle())
             .shadow(radius: 4)
             .padding(.trailing, 20)
