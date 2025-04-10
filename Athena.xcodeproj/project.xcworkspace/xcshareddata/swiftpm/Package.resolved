@@ -1,5 +1,5 @@
 {
-  "originHash" : "508afde6b0a9495c7a6c4bf7c4a79dccf84f4cf63c450eafaf2d5c9d417eff93",
+  "originHash" : "7ed78cec4688813732ed048994a6c24c5c081e333197fce4007040cea0ee7d0c",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -29,39 +29,12 @@
       }
     },
     {
-      "identity" : "clerk-ios",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/clerk/clerk-ios",
-      "state" : {
-        "revision" : "ee1e4773b3b29c0c987375a7c166a48501a23bc3",
-        "version" : "0.53.0"
-      }
-    },
-    {
-      "identity" : "factory",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/hmlongco/Factory",
-      "state" : {
-        "revision" : "fb04a8918848e413d3921d346a23bae7f81088d9",
-        "version" : "2.4.3"
-      }
-    },
-    {
       "identity" : "firebase-ios-sdk",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/firebase/firebase-ios-sdk",
       "state" : {
         "revision" : "2e4a4daac9da51f79c131e76cb47e785dd7708c4",
         "version" : "11.10.0"
-      }
-    },
-    {
-      "identity" : "get",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/kean/Get",
-      "state" : {
-        "revision" : "31249885da1052872e0ac91a2943f62567c0d96d",
-        "version" : "2.2.1"
       }
     },
     {
@@ -161,15 +134,6 @@
       "state" : {
         "revision" : "540318ecedd63d883069ae7f1ed811a2df00b6ac",
         "version" : "2.4.0"
-      }
-    },
-    {
-      "identity" : "simplekeychain",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/auth0/SimpleKeychain",
-      "state" : {
-        "revision" : "b694f155907b189bc82e93586695a26f558c742f",
-        "version" : "1.2.0"
       }
     },
     {

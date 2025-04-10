@@ -37,10 +37,7 @@ struct ContentView: View {
                 }
                 .tint(.secondaryPurple)
             } else {
-                NavigationView {
-                    SignUpOrSignInView()
-                        .navigationTitle("Sign Up")
-                }
+                SignUpOrSignInView()
             }
         }
         .environmentObject(authVM)
