@@ -19,7 +19,7 @@ struct QuizItem: Identifiable, Codable {
     var body: String
     var type: QuizItemType
     var courseId: String
-    //    var opened: Bool
+    var scheduled: Bool
     var tags: [String]
 
     // questions
@@ -41,6 +41,7 @@ extension QuizItem {
             "body": body,
             "type": type.rawValue,
             "courseId": courseId,
+            "scheduled": scheduled,
             "tags": tags,
         ]
 
@@ -63,6 +64,7 @@ let exampleQuizItems: [QuizItem] = [
         body: "What is a process in Operating Systems?",
         type: .question,
         courseId: "cse335",
+        scheduled: true,
         tags: ["Operating Systems", "Processes"],
         options: [
             "A program in execution",
@@ -76,9 +78,10 @@ let exampleQuizItems: [QuizItem] = [
     QuizItem(
         title: "Swift Concurrency",
         body:
-            "Swift's async/await feature allows you to write asynchronous code that looks like synchronous code. This makes complex operations like network requests much easier to understand and maintain.",
+        "Swift's async/await feature allows you to write asynchronous code that looks like synchronous code. This makes complex operations like network requests much easier to understand and maintain.",
         type: .snippet,
         courseId: "cse335",
+        scheduled: true,
         tags: ["Swift", "Concurrency", "Async/Await"]
     ),
 ]

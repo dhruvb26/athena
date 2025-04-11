@@ -26,7 +26,7 @@ struct Snippet: Identifiable, Codable {
         title = try container.decode(String.self, forKey: .title)
         body = try container.decode(String.self, forKey: .body)
         tags = try container.decode([String].self, forKey: .tags)
-        id = UUID()  // Generate a new UUID since it's not in the JSON
+        id = UUID() // Generate a new UUID since it's not in the JSON
     }
 }
 
@@ -131,7 +131,8 @@ class CourseEditViewModel: ObservableObject {
                         completion: {
                             // Call processDocument with the uploaded file's URL
                             self.processDocument(
-                                url: url.absoluteString, courseID: course.docID ?? "")
+                                url: url.absoluteString, courseID: course.docID ?? ""
+                            )
                             completion()
                         }
                     )
@@ -149,7 +150,7 @@ class CourseEditViewModel: ObservableObject {
         guard let courseId = course.docID else { return }
 
         firestore.collection("courses").document(courseId).updateData([
-            "documents": FieldValue.arrayUnion([document.firestoreRepresentation()])
+            "documents": FieldValue.arrayUnion([document.firestoreRepresentation()]),
         ]) { error in
             if let error {
                 self.uploadError = error
@@ -181,7 +182,7 @@ class CourseEditViewModel: ObservableObject {
             }
 
             guard let documentSnapshot, documentSnapshot.exists,
-                var courseData = try? documentSnapshot.data(as: Course.self)
+                  var courseData = try? documentSnapshot.data(as: Course.self)
             else {
                 self.uploadError = NSError(
                     domain: "Firestore", code: 2,
@@ -229,7 +230,7 @@ class CourseEditViewModel: ObservableObject {
     }
 
     func processDocument(url: String, courseID: String) {
-        self.courseId = courseID
+        courseId = courseID
 
         // Create URL for the OCR endpoint
         guard
@@ -257,7 +258,7 @@ class CourseEditViewModel: ObservableObject {
 
             // Create and start the data task
             let task = URLSession.shared.dataTask(with: request) { data, response, error in
-                if let error = error {
+                if let error {
                     print("Error making request: \(error.localizedDescription)")
                     return
                 }
@@ -267,7 +268,7 @@ class CourseEditViewModel: ObservableObject {
                     return
                 }
 
-                if httpResponse.statusCode == 200, let data = data {
+                if httpResponse.statusCode == 200, let data {
                     // Handle successful response
                     do {
                         if let jsonResult = try JSONSerialization.jsonObject(with: data)
@@ -283,7 +284,7 @@ class CourseEditViewModel: ObservableObject {
                     }
                 } else {
                     print("Error: HTTP status code \(httpResponse.statusCode)")
-                    if let data = data, let errorMessage = String(data: data, encoding: .utf8) {
+                    if let data, let errorMessage = String(data: data, encoding: .utf8) {
                         print("Server response: \(errorMessage)")
                     }
                 }
@@ -301,7 +302,7 @@ class CourseEditViewModel: ObservableObject {
         guard
             let geminiEndpoint = URL(
                 string:
-                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+                "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
             )
         else {
             print("Error: Invalid Gemini endpoint URL")
@@ -344,7 +345,8 @@ class CourseEditViewModel: ObservableObject {
         // Convert the cleaned pages array to JSON
         do {
             let jsonData = try JSONSerialization.data(
-                withJSONObject: cleanedPages, options: .prettyPrinted)
+                withJSONObject: cleanedPages, options: .prettyPrinted
+            )
             guard let cleanedContent = String(data: jsonData, encoding: .utf8) else {
                 print("Error: Failed to convert cleaned pages to string")
                 return
@@ -358,11 +360,11 @@ class CourseEditViewModel: ObservableObject {
                         "parts": [
                             [
                                 "text":
-                                    "You are an assistant that helps create snippets of topics from the given content. Understand the given content and return 2 snippets to be sent to users as notifications with a title and body. Return the snippets in json format and for every snippet include a field of tags. Process this content and return json format: \(cleanedContent)"
-                            ]
+                                    "You are an assistant that helps create snippets of topics from the given content. Understand the given content and return 2 snippets to be sent to users as notifications with a title and body. Return the snippets in json format and for every snippet include a field of tags. Process this content and return json format: \(cleanedContent)",
+                            ],
                         ],
-                    ]
-                ]
+                    ],
+                ],
             ]
 
             // Convert request body to JSON data
@@ -379,7 +381,7 @@ class CourseEditViewModel: ObservableObject {
 
             // Create and start the data task
             let task = URLSession.shared.dataTask(with: request) { data, response, error in
-                if let error = error {
+                if let error {
                     print("Error making Gemini request: \(error.localizedDescription)")
                     return
                 }
@@ -389,7 +391,7 @@ class CourseEditViewModel: ObservableObject {
                     return
                 }
 
-                if httpResponse.statusCode == 200, let data = data {
+                if httpResponse.statusCode == 200, let data {
                     // Handle successful response
                     do {
                         if let jsonResponse = try JSONSerialization.jsonObject(with: data)
@@ -407,7 +409,7 @@ class CourseEditViewModel: ObservableObject {
                                     // Clean up the text by removing markdown formatting
                                     var cleanedText =
                                         text
-                                        .trimmingCharacters(in: .whitespacesAndNewlines)
+                                            .trimmingCharacters(in: .whitespacesAndNewlines)
 
                                     // Remove "```json" at the start if it exists
                                     if cleanedText.hasPrefix("```json") {
@@ -429,7 +431,8 @@ class CourseEditViewModel: ObservableObject {
                                         do {
                                             // Parse the array of snippets directly
                                             let snippets = try JSONDecoder().decode(
-                                                [Snippet].self, from: cleanedData)
+                                                [Snippet].self, from: cleanedData
+                                            )
                                             print("Successfully parsed snippets:")
 
                                             // Add each snippet as a quiz item
@@ -483,5 +486,4 @@ class CourseEditViewModel: ObservableObject {
             print("Error preparing Gemini request: \(error.localizedDescription)")
         }
     }
-
 }
