@@ -8,12 +8,14 @@
 import SwiftUI
 import UserNotifications
 
+// MARK: - Types
+
 typealias NotificationActionHandler = (UNNotificationResponse) -> Void
 
 struct NotificationAction {
     let identifier: String
     let title: String
-    let options: UNNotificationActionOptions // example: .authenticationRequire, .foreground, .destructive
+    let options: UNNotificationActionOptions
     let handler: NotificationActionHandler
 }
 
@@ -22,24 +24,34 @@ struct NotificationCategory {
     let actions: [NotificationAction]
 }
 
-class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
-    static let shared = NotificationManager()
+// MARK: - NotificationManager
 
+class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
+    // MARK: - Properties
+    
+    static let shared = NotificationManager()
+    
     private var categories: [String: NotificationCategory] = [:]
     private var actionHandlers: [String: NotificationActionHandler] = [:]
-
+    
+    // MARK: - Initialization
+    
     override private init() {
         super.init()
         UNUserNotificationCenter.current().delegate = self
     }
-
+    
+    // MARK: - Category Management
+    
     func registerCategory(_ category: NotificationCategory) {
         categories[category.identifier] = category
-
+        
+        // Store action handlers
         for action in category.actions {
             actionHandlers[action.identifier] = action.handler
         }
-
+        
+        // Create notification actions
         let notificationActions = category.actions.map { action in
             UNNotificationAction(
                 identifier: action.identifier,
@@ -47,40 +59,34 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
                 options: action.options
             )
         }
-
-        // create and register the category
+        
+        // Create and register the category
         let notificationCategory = UNNotificationCategory(
             identifier: category.identifier,
             actions: notificationActions,
             intentIdentifiers: [],
             options: []
         )
-
-        // get existing categories and add the new one
+        
+        // Get existing categories and add the new one
         UNUserNotificationCenter.current().getNotificationCategories { categories in
             var updatedCategories = categories
             updatedCategories.insert(notificationCategory)
             UNUserNotificationCenter.current().setNotificationCategories(updatedCategories)
         }
     }
-
+    
+    // MARK: - Permissions
+    
     func requestPermission(completion: @escaping (Bool, Error?) -> Void) {
         UNUserNotificationCenter.current().requestAuthorization(
-            options: [.alert, .sound, .badge, .provisional], completionHandler: completion
+            options: [.alert, .sound, .badge, .provisional], 
+            completionHandler: completion
         )
     }
-
-    // handles notifications while the app is in foreground
-    func userNotificationCenter(
-        _: UNUserNotificationCenter,
-        willPresent _: UNNotification,
-        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) ->
-            Void
-    ) {
-        completionHandler([.banner, .sound])
-    }
-
-    // Basic notification without actions
+    
+    // MARK: - Basic Notifications
+    
     func scheduleBasicNotification(
         title: String,
         body: String,
@@ -92,23 +98,33 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         content.body = body
         content.sound = UNNotificationSound.default
         content.userInfo = userInfo
-
-        let request = UNNotificationRequest(
-            identifier: UUID().uuidString,
-            content: content,
-            trigger: trigger
-        )
-
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error {
-                print("Failed to schedule notification: \(error.localizedDescription)")
-            } else {
-                print("Notification scheduled successfully.")
-            }
-        }
+        
+        scheduleNotification(content: content, trigger: trigger)
     }
-
-    // interactive notification with category and actions
+    
+    func scheduleBasicNotification(
+        title: String,
+        body: String,
+        timeInterval: TimeInterval,
+        repeats: Bool = false
+    ) {
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: timeInterval, repeats: repeats)
+        scheduleBasicNotification(title: title, body: body, trigger: trigger)
+    }
+    
+    func scheduleBasicNotification(
+        title: String,
+        body: String,
+        userInfo: [AnyHashable: Any] = [:],
+        date: Date,
+        repeats: Bool = false
+    ) {
+        let trigger = createCalendarTrigger(from: date, repeats: repeats)
+        scheduleBasicNotification(title: title, body: body, userInfo: userInfo, trigger: trigger)
+    }
+    
+    // MARK: - Interactive Notifications
+    
     func scheduleInteractiveNotification(
         title: String,
         body: String,
@@ -120,20 +136,69 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
             print("Error: Category \(categoryIdentifier) not registered")
             return
         }
-
+        
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = body
         content.sound = UNNotificationSound.default
         content.categoryIdentifier = categoryIdentifier
         content.userInfo = userInfo
-
+        
+        scheduleNotification(content: content, trigger: trigger)
+    }
+    
+    func scheduleInteractiveNotification(
+        title: String,
+        body: String,
+        categoryIdentifier: String,
+        userInfo: [AnyHashable: Any] = [:],
+        timeInterval: TimeInterval,
+        repeats: Bool = false
+    ) {
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: timeInterval, repeats: repeats)
+        scheduleInteractiveNotification(
+            title: title,
+            body: body,
+            categoryIdentifier: categoryIdentifier,
+            userInfo: userInfo,
+            trigger: trigger
+        )
+    }
+    
+    func scheduleInteractiveNotification(
+        title: String,
+        body: String,
+        categoryIdentifier: String,
+        userInfo: [AnyHashable: Any] = [:],
+        date: Date,
+        repeats: Bool = false
+    ) {
+        let trigger = createCalendarTrigger(from: date, repeats: repeats)
+        scheduleInteractiveNotification(
+            title: title,
+            body: body,
+            categoryIdentifier: categoryIdentifier,
+            userInfo: userInfo,
+            trigger: trigger
+        )
+    }
+    
+    // MARK: - Helper Methods
+    
+    private func createCalendarTrigger(from date: Date, repeats: Bool) -> UNCalendarNotificationTrigger {
+        let components = Calendar.current.dateComponents(
+            [.year, .month, .day, .hour, .minute, .second], from: date
+        )
+        return UNCalendarNotificationTrigger(dateMatching: components, repeats: repeats)
+    }
+    
+    private func scheduleNotification(content: UNNotificationContent, trigger: UNNotificationTrigger) {
         let request = UNNotificationRequest(
             identifier: UUID().uuidString,
             content: content,
             trigger: trigger
         )
-
+        
         UNUserNotificationCenter.current().add(request) { error in
             if let error {
                 print("Failed to schedule notification: \(error.localizedDescription)")
@@ -142,86 +207,17 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
             }
         }
     }
-
-    func scheduleBasicNotification(
-        title: String,
-        body: String,
-        userInfo: [AnyHashable: Any] = [:],
-        timeInterval: TimeInterval,
-        repeats: Bool = false
+    
+    // MARK: - UNUserNotificationCenterDelegate
+    
+    func userNotificationCenter(
+        _: UNUserNotificationCenter,
+        willPresent _: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
-        let trigger = UNTimeIntervalNotificationTrigger(
-            timeInterval: timeInterval, repeats: repeats
-        )
-        scheduleBasicNotification(
-            title: title,
-            body: body,
-            userInfo: userInfo,
-            trigger: trigger
-        )
+        completionHandler([.banner, .sound])
     }
-
-    func scheduleBasicNotification(
-        title: String,
-        body: String,
-        userInfo: [AnyHashable: Any] = [:],
-        date: Date,
-        repeats: Bool = false
-    ) {
-        let components = Calendar.current.dateComponents(
-            [.year, .month, .day, .hour, .minute, .second], from: date
-        )
-        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: repeats)
-        scheduleBasicNotification(
-            title: title,
-            body: body,
-            userInfo: userInfo,
-            trigger: trigger
-        )
-    }
-
-    func scheduleInteractiveNotification(
-        title: String,
-        body: String,
-        categoryIdentifier: String,
-        userInfo: [AnyHashable: Any] = [:],
-        timeInterval: TimeInterval,
-        repeats: Bool = false
-    ) {
-        let trigger = UNTimeIntervalNotificationTrigger(
-            timeInterval: timeInterval, repeats: repeats
-        )
-        scheduleInteractiveNotification(
-            title: title,
-            body: body,
-            categoryIdentifier: categoryIdentifier,
-            userInfo: userInfo,
-            trigger: trigger
-        )
-    }
-
-    func scheduleInteractiveNotification(
-        title: String,
-        body: String,
-        categoryIdentifier: String,
-        userInfo: [AnyHashable: Any] = [:],
-        date: Date,
-        repeats: Bool = false
-    ) {
-        let components = Calendar.current.dateComponents(
-            [.year, .month, .day, .hour, .minute, .second], from: date
-        )
-        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: repeats)
-        scheduleInteractiveNotification(
-            title: title,
-            body: body,
-            categoryIdentifier: categoryIdentifier,
-            userInfo: userInfo,
-            trigger: trigger
-        )
-    }
-
-    // notification response when user taps an action
+    
     func userNotificationCenter(
         _: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse,

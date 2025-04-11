@@ -25,6 +25,13 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                 print("Error requesting notification permission: \(error.localizedDescription)")
             }
         }
+
+        NotificationManager.shared.scheduleBasicNotification(
+            title: "One Minute Reminder",
+            body: "This notification was scheduled to appear one minute after app launch",
+            timeInterval: 60,
+            repeats: false
+        )
         return true
     }
 

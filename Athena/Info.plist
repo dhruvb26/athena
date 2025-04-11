@@ -13,6 +13,13 @@
 			</array>
 		</dict>
 	</array>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+		<key>NSAppTransportSecurity</key>
+		<dict/>
+	</dict>
 	<key>UIAppFonts</key>
 	<array>
 		<string>AGaramondPro-Regular.otf</string>
@@ -20,12 +27,5 @@
 		<string>AGaramondPro-Bold.otf</string>
 		<string>AGaramondPro-BoldItalic.otf</string>
 	</array>
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAppTransportSecurity</key>
-		<dict/>
-		<key>NSAllowsArbitraryLoads</key>
-		<true/>
-	</dict>
 </dict>
 </plist>
