@@ -15,6 +15,19 @@ struct Snippet: Identifiable, Codable {
     var id = UUID()
     var title: String
     var body: String
+    var tags: [String]
+
+    enum CodingKeys: String, CodingKey {
+        case title, body, tags
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        title = try container.decode(String.self, forKey: .title)
+        body = try container.decode(String.self, forKey: .body)
+        tags = try container.decode([String].self, forKey: .tags)
+        id = UUID()  // Generate a new UUID since it's not in the JSON
+    }
 }
 
 struct SnippetsResponse: Codable {
@@ -29,6 +42,8 @@ class CourseEditViewModel: ObservableObject {
 
     private let firestore = Firestore.firestore()
     private let storage = Storage.storage()
+    private let quizItemViewModel = QuizItemViewModel()
+    private var courseId: String = ""
 
     private var currentUserId: String? {
         Auth.auth().currentUser?.uid
@@ -112,7 +127,13 @@ class CourseEditViewModel: ObservableObject {
                         title: title, url: url.absoluteString
                     )
                     self.addDocumentReference(
-                        to: course, document: document, completion: completion
+                        to: course, document: document,
+                        completion: {
+                            // Call processDocument with the uploaded file's URL
+                            self.processDocument(
+                                url: url.absoluteString, courseID: course.docID ?? "")
+                            completion()
+                        }
                     )
                 }
             }
@@ -208,6 +229,8 @@ class CourseEditViewModel: ObservableObject {
     }
 
     func processDocument(url: String, courseID: String) {
+        self.courseId = courseID
+
         // Create URL for the OCR endpoint
         guard
             let ocrEndpoint = URL(
@@ -286,7 +309,7 @@ class CourseEditViewModel: ObservableObject {
         }
 
         // Get Gemini API key (in a real app, store this securely)
-        let apiKey = "API_KEY_HERE"
+        let apiKey = "AIzaSyBF6D16AWwA3Hu99LGHEmwtzEqb0CA8ki4"
 
         // Extract pages array from OCR result
         guard let pages = ocrResult["pages"] as? [[String: Any]] else {
@@ -335,7 +358,7 @@ class CourseEditViewModel: ObservableObject {
                         "parts": [
                             [
                                 "text":
-                                    "You are an assistant that helps create snippets of topics from the given content. Understand the given content and return 5 snippets to be sent to users as notifications with a title and body. Return the snippets in json format. Process this content and return json format: \(cleanedContent)"
+                                    "You are an assistant that helps create snippets of topics from the given content. Understand the given content and return 2 snippets to be sent to users as notifications with a title and body. Return the snippets in json format and for every snippet include a field of tags. Process this content and return json format: \(cleanedContent)"
                             ]
                         ],
                     ]
@@ -403,12 +426,33 @@ class CourseEditViewModel: ObservableObject {
 
                                     // Try to parse the cleaned text
                                     if let cleanedData = cleanedText.data(using: .utf8) {
-                                        let snippetsResponse = try JSONDecoder().decode(
-                                            SnippetsResponse.self, from: cleanedData)
-                                        print("Successfully parsed snippets:")
-                                        for snippet in snippetsResponse.snippets {
-                                            print("\nTitle: \(snippet.title)")
-                                            print("Body: \(snippet.body)")
+                                        do {
+                                            // Parse the array of snippets directly
+                                            let snippets = try JSONDecoder().decode(
+                                                [Snippet].self, from: cleanedData)
+                                            print("Successfully parsed snippets:")
+
+                                            // Add each snippet as a quiz item
+                                            for snippet in snippets {
+                                                print("\nTitle: \(snippet.title)")
+                                                print("Body: \(snippet.body)")
+                                                print("Tags: \(snippet.tags)")
+
+                                                // Add the snippet as a quiz item
+                                                self.quizItemViewModel.addQuizItem(
+                                                    title: snippet.title,
+                                                    body: snippet.body,
+                                                    type: .snippet,
+                                                    courseId: self.courseId,
+                                                    tags: snippet.tags
+                                                ) {
+                                                    print("✅ Snippet added as quiz item")
+                                                }
+                                            }
+                                        } catch {
+                                            print("Error parsing snippets JSON: \(error)")
+                                            print("Raw text from Gemini:")
+                                            print(text)
                                         }
                                     }
                                 } catch {
