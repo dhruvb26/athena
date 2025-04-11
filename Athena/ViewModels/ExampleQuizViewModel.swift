@@ -63,7 +63,7 @@ class ExampleQuizViewModel: ObservableObject {
             return
         }
 
-        let questionText = randomQuizItem.content
+        let questionText = randomQuizItem.body
 
         let optionsText = options.enumerated().map { index, option in
             "\(Character(UnicodeScalar(65 + index)!)). \(option)"
