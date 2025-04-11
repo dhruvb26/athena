@@ -16,21 +16,17 @@ enum QuizItemType: String, Codable {
 struct QuizItem: Identifiable, Codable {
     @DocumentID var docID: String?
     var title: String
-    var content: String
+    var body: String
     var type: QuizItemType
     var courseId: String
-    var createdAt: Date
+    //    var opened: Bool
+    var tags: [String]
 
     // questions
     var options: [String]?
     var correctAnswerIndex: Int?
     var answered: Bool?
     var recordedAnswerIndex: Int?
-
-    // snippets
-    var topic: String?
-    var tags: [String]?
-    var opened: Bool?
 
     var id: String {
         docID ?? UUID().uuidString
@@ -42,10 +38,10 @@ extension QuizItem {
     func firestoreRepresentation() -> [String: Any] {
         var representation: [String: Any] = [
             "title": title,
-            "content": content,
+            "body": body,
             "type": type.rawValue,
             "courseId": courseId,
-            "createdAt": createdAt,
+            "tags": tags,
         ]
 
         if type == .question, let options, let correctAnswerIndex {
@@ -55,10 +51,6 @@ extension QuizItem {
             if let recordedAnswerIndex {
                 representation["recordedAnswerIndex"] = recordedAnswerIndex
             }
-        } else if type == .snippet {
-            representation["topic"] = topic ?? ""
-            representation["tags"] = tags ?? []
-            representation["opened"] = opened ?? false
         }
 
         return representation
@@ -68,10 +60,10 @@ extension QuizItem {
 let exampleQuizItems: [QuizItem] = [
     QuizItem(
         title: "Operating Systems Quiz",
-        content: "What is a process in Operating Systems?",
+        body: "What is a process in Operating Systems?",
         type: .question,
         courseId: "cse335",
-        createdAt: Date(),
+        tags: ["Operating Systems", "Processes"],
         options: [
             "A program in execution",
             "A file on disk",
@@ -83,12 +75,10 @@ let exampleQuizItems: [QuizItem] = [
 
     QuizItem(
         title: "Swift Concurrency",
-        content:
-        "Swift's async/await feature allows you to write asynchronous code that looks like synchronous code. This makes complex operations like network requests much easier to understand and maintain.",
+        body:
+            "Swift's async/await feature allows you to write asynchronous code that looks like synchronous code. This makes complex operations like network requests much easier to understand and maintain.",
         type: .snippet,
         courseId: "cse335",
-        createdAt: Date(),
-        topic: "iOS Development",
         tags: ["Swift", "Concurrency", "Async/Await"]
     ),
 ]
