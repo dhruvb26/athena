@@ -24,6 +24,10 @@ class QuizItemViewModel: ObservableObject {
         Auth.auth().currentUser?.uid
     }
 
+    init() {
+        // We'll no longer register a static category since we'll create dynamic ones per question
+    }
+
     func addQuizItem(
         title: String,
         body: String,
@@ -74,13 +78,12 @@ class QuizItemViewModel: ObservableObject {
         }
     }
 
-    func fetchSnippetsAndScheduleNotifications() {
+    func fetchUnscheduledQuizItemsAndScheduleNotifications() {
         isLoading = true
 
         snippets.removeAll()
 
         firestore.collection("quizItems")
-            .whereField("type", isEqualTo: QuizItemType.snippet.rawValue)
             .whereField("scheduled", isEqualTo: false)
             .getDocuments { [weak self] snapshot, error in
                 guard let self else { return }
@@ -89,57 +92,118 @@ class QuizItemViewModel: ObservableObject {
 
                 if let error {
                     loadError = error
-                    print("Error fetching snippets: \(error.localizedDescription)")
+                    print("Error fetching quiz items: \(error.localizedDescription)")
                     return
                 }
 
                 guard let documents = snapshot?.documents else {
-                    print("No unscheduled snippet documents found")
+                    print("No unscheduled quiz items found")
                     return
                 }
 
                 for document in documents {
                     do {
-                        var snippet = try document.data(as: QuizItem.self)
-                        snippets.append(snippet)
+                        var quizItem = try document.data(as: QuizItem.self)
+                        snippets.append(quizItem)
 
-                        // Schedule a notification for this snippet
-                        scheduleNotificationForSnippet(snippet)
+                        // Schedule a notification based on quiz item type
+                        scheduleNotificationForQuizItem(quizItem)
 
-                        // Mark the snippet as scheduled
-                        markSnippetAsScheduled(documentId: document.documentID)
+                        // Mark the quiz item as scheduled
+                        markQuizItemAsScheduled(documentId: document.documentID)
                     } catch {
-                        print("Error decoding snippet: \(error.localizedDescription)")
+                        print("Error decoding quiz item: \(error.localizedDescription)")
                     }
                 }
 
                 print(
-                    "✅ Fetched \(snippets.count) unscheduled snippets and scheduled notifications"
+                    "✅ Fetched \(snippets.count) unscheduled quiz items and scheduled notifications"
                 )
             }
     }
 
-    private func scheduleNotificationForSnippet(_ snippet: QuizItem) {
-        let randomTime = TimeInterval.random(in: 60 ... 120) // Between 1 minute and 2 minutes
+    private func scheduleNotificationForQuizItem(_ quizItem: QuizItem) {
+        // Random time between 1 minute and 2 minutes
+        let randomTime = TimeInterval.random(in: 60 ... 120)
+        let tagString = quizItem.tags.isEmpty ? "" : " #\(quizItem.tags.joined(separator: " #"))"
 
-        let tagString = snippet.tags.isEmpty ? "" : " #\(snippet.tags.joined(separator: " #"))"
+        switch quizItem.type {
+        case .snippet:
+            notificationManager.scheduleBasicNotification(
+                title: "\(quizItem.title)",
+                body: "\(quizItem.body)",
+                timeInterval: randomTime,
+                repeats: false
+            )
+        case .question:
+            // For questions, create dynamic notification actions for each option
+            if let options = quizItem.options, let correctAnswerIndex = quizItem.correctAnswerIndex {
+                let categoryId = "QUIZ_QUESTION_\(quizItem.id ?? UUID().uuidString)"
 
-        notificationManager.scheduleBasicNotification(
-            title: "\(snippet.title)",
-            body: "\(snippet.body)",
-            timeInterval: randomTime,
-            repeats: false
-        )
+                // Create an action for each option
+                var actions: [NotificationAction] = []
+
+                for (index, option) in options.enumerated() {
+                    let isCorrect = index == correctAnswerIndex
+                    let actionId = "OPTION_\(index)_\(isCorrect ? "CORRECT" : "INCORRECT")"
+
+                    let action = NotificationAction(
+                        identifier: actionId,
+                        title: option,
+                        options: [],
+                        handler: { [weak self] _ in
+                            print(
+                                "User selected option \(index): \(isCorrect ? "correct" : "incorrect")"
+                            )
+                            // Could add feedback or scoring logic here
+                        }
+                    )
+
+                    actions.append(action)
+                }
+
+                // Register the dynamic category for this specific question
+                let category = NotificationCategory(
+                    identifier: categoryId,
+                    actions: actions
+                )
+
+                notificationManager.registerCategory(category)
+
+                // Schedule the notification with just the question title and body
+                let userInfo: [AnyHashable: Any] = [
+                    "quizItemId": quizItem.id ?? "",
+                    "correctAnswerIndex": correctAnswerIndex,
+                ]
+
+                notificationManager.scheduleInteractiveNotification(
+                    title: "Quiz Question: \(quizItem.title)",
+                    body: quizItem.body,
+                    categoryIdentifier: categoryId,
+                    userInfo: userInfo,
+                    timeInterval: randomTime,
+                    repeats: false
+                )
+            } else {
+                // Fallback if we don't have options or correctAnswerIndex
+                notificationManager.scheduleBasicNotification(
+                    title: "Quiz Question: \(quizItem.title)",
+                    body: quizItem.body,
+                    timeInterval: randomTime,
+                    repeats: false
+                )
+            }
+        }
     }
 
-    private func markSnippetAsScheduled(documentId: String) {
+    private func markQuizItemAsScheduled(documentId: String) {
         firestore.collection("quizItems").document(documentId).updateData([
             "scheduled": true,
         ]) { error in
             if let error {
                 print("Error updating scheduled status: \(error.localizedDescription)")
             } else {
-                print("✅ Marked snippet as scheduled")
+                print("✅ Marked quiz item as scheduled")
             }
         }
     }
