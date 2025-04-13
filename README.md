@@ -2,8 +2,16 @@
 
 Official repository for Athena. 
 
-**Roadmap**
+### Setup
+Create a ```Debug.xcconfig``` file in Athena📁 and add the following
 
+```
+OPENAI_API_KEY=
+GEMINI_API_KEY=
+API_BASE_URL=
+```
+
+### Roadmap
 - [ ] Add swift-log to all files
 - [ ] Remove unnecessary completion handlers
 - [ ] Add quiz item fetching and notification scheduling logic
