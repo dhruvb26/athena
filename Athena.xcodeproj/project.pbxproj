@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FC0DEBB22DAA675600A0AE81 /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = FC0DEBB12DAA675600A0AE81 /* Logging */; };
 		FCBAB2692D974EE9007FC275 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = FCBAB2682D974EE9007FC275 /* FirebaseAnalytics */; };
 		FCBAB26B2D974EE9007FC275 /* FirebaseAnalyticsOnDeviceConversion in Frameworks */ = {isa = PBXBuildFile; productRef = FCBAB26A2D974EE9007FC275 /* FirebaseAnalyticsOnDeviceConversion */; };
 		FCBAB26D2D974EE9007FC275 /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */ = {isa = PBXBuildFile; productRef = FCBAB26C2D974EE9007FC275 /* FirebaseAnalyticsWithoutAdIdSupport */; };
@@ -102,6 +103,7 @@
 				FCBAB2912D974EE9007FC275 /* FirebaseRemoteConfig in Frameworks */,
 				FCBAB2792D974EE9007FC275 /* FirebaseCrashlytics in Frameworks */,
 				FCBAB28D2D974EE9007FC275 /* FirebaseMessaging in Frameworks */,
+				FC0DEBB22DAA675600A0AE81 /* Logging in Frameworks */,
 				FCBAB28B2D974EE9007FC275 /* FirebaseMLModelDownloader in Frameworks */,
 				FCBAB28F2D974EE9007FC275 /* FirebasePerformance in Frameworks */,
 				FCBAB27B2D974EE9007FC275 /* FirebaseDatabase in Frameworks */,
@@ -194,6 +196,7 @@
 				FCBAB2962D974EE9007FC275 /* FirebaseVertexAI */,
 				FCBAB3362D9893F3007FC275 /* GoogleSignIn */,
 				FCBAB3382D9893F3007FC275 /* GoogleSignInSwift */,
+				FC0DEBB12DAA675600A0AE81 /* Logging */,
 			);
 			productName = MainProject;
 			productReference = FC62213D2D9356C9005093BF /* Athena.app */;
@@ -274,6 +277,7 @@
 			packageReferences = (
 				FCBAB2672D974E76007FC275 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				FCBAB3352D9893F3007FC275 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				FC0DEBB02DAA675600A0AE81 /* XCRemoteSwiftPackageReference "swift-log" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = FC62213E2D9356C9005093BF /* Products */;
@@ -351,6 +355,8 @@
 /* Begin XCBuildConfiguration section */
 		FC62215F2D9356CA005093BF /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = FC62213F2D9356C9005093BF /* Athena */;
+			baseConfigurationReferenceRelativePath = Debug.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -470,6 +476,8 @@
 		};
 		FC6221622D9356CA005093BF /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = FC62213F2D9356C9005093BF /* Athena */;
+			baseConfigurationReferenceRelativePath = Debug.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -530,6 +538,8 @@
 		};
 		FC6221652D9356CA005093BF /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = FC62213F2D9356C9005093BF /* Athena */;
+			baseConfigurationReferenceRelativePath = Debug.xcconfig;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
@@ -566,6 +576,8 @@
 		};
 		FC6221682D9356CA005093BF /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = FC62213F2D9356C9005093BF /* Athena */;
+			baseConfigurationReferenceRelativePath = Debug.xcconfig;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -638,6 +650,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		FC0DEBB02DAA675600A0AE81 /* XCRemoteSwiftPackageReference "swift-log" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-log.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.6.3;
+			};
+		};
 		FCBAB2672D974E76007FC275 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
@@ -657,6 +677,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		FC0DEBB12DAA675600A0AE81 /* Logging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FC0DEBB02DAA675600A0AE81 /* XCRemoteSwiftPackageReference "swift-log" */;
+			productName = Logging;
+		};
 		FCBAB2682D974EE9007FC275 /* FirebaseAnalytics */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = FCBAB2672D974E76007FC275 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;

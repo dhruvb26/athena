@@ -6,20 +6,19 @@
 //
 
 import SwiftUI
-import UniformTypeIdentifiers
 
 struct AddCourseView: View {
     @Environment(\.dismiss) var dismiss
-    @StateObject private var viewModel = CourseAddViewModel()
+
+    @EnvironmentObject var authViewModel: AuthViewModel
+    @StateObject private var courseManager = CourseManager()
 
     @State private var name = ""
     @State private var code = ""
     @State private var semester = ""
-    @State private var documentTitle = "Document"
-    @State private var selectedFileURL: URL?
+    @State private var documentTitle = ""
     @State private var notificationType: NotificationType = .question
-    @State private var difficulty: Difficulty? = .easy
-    @State private var showingFilePicker = false
+    @State private var difficulty: Difficulty = .easy
     @State private var isUploadingOverlayVisible = false
 
     var body: some View {
@@ -43,53 +42,35 @@ struct AddCourseView: View {
 
                         Section {
                             Picker("Difficulty", selection: $difficulty) {
-                                Text("Easy").tag(Difficulty.easy as Difficulty?)
-                                Text("Medium").tag(Difficulty.medium as Difficulty?)
-                                Text("Hard").tag(Difficulty.hard as Difficulty?)
-                            }
-                        }
-
-                        Section {
-                            Button("Select Document") {
-                                showingFilePicker = true
-                            }
-                        }
-
-                        if let fileURL = selectedFileURL {
-                            Section(header: Text("Document Information")) {
-                                VStack(alignment: .leading) {
-                                    Text(fileURL.lastPathComponent)
-                                        .font(.subheadline)
-                                        .foregroundColor(.gray)
-                                }
-                                TextField("Document Title", text: $documentTitle)
+                                Text("Easy").tag(Difficulty.easy)
+                                Text("Medium").tag(Difficulty.medium)
+                                Text("Hard").tag(Difficulty.hard)
                             }
                         }
                     }
                     .navigationTitle("New Course")
                     .navigationBarTitleDisplayMode(.inline)
-                    .toolbar {
-                        ToolbarItem(placement: .navigationBarLeading) {
-                            Button("Cancel") {
-                                dismiss()
-                            }
-                        }
-                    }
 
                     Button {
                         isUploadingOverlayVisible = true
-                        viewModel.uploadCourse(
+
+                        let userId = authViewModel.getAuthUserId()
+
+                        let course = Course(
                             name: name,
                             code: code,
                             semester: semester,
                             notificationType: notificationType,
                             difficulty: difficulty,
-                            documentTitle: documentTitle,
-                            selectedFileURL: selectedFileURL
-                        ) {
+                            documents: [],
+                            userId: userId
+                        )
+
+                        courseManager.saveCourseToDB(course) {
                             isUploadingOverlayVisible = false
                             dismiss()
                         }
+
                     } label: {
                         Text("Confirm")
                             .frame(maxWidth: .infinity)
@@ -101,30 +82,8 @@ struct AddCourseView: View {
                             .fontWeight(.semibold)
                     }
                     .padding(15)
-                    .disabled(viewModel.isUploading)
-
-                    if let error = viewModel.uploadError {
-                        Text("Upload Error: \(error.localizedDescription)")
-                            .foregroundColor(.red)
-                            .padding(.top)
-                    }
                 }
                 .tint(Color.secondaryPurple)
-                .fileImporter(
-                    isPresented: $showingFilePicker,
-                    allowedContentTypes: [UTType.pdf, UTType.presentation, UTType.plainText],
-                    allowsMultipleSelection: false
-                ) { result in
-                    switch result {
-                    case let .success(files):
-                        if let fileURL = files.first {
-                            selectedFileURL = fileURL
-                            documentTitle = fileURL.deletingPathExtension().lastPathComponent
-                        }
-                    case let .failure(error):
-                        print("❌ File selection error: \(error.localizedDescription)")
-                    }
-                }
             }
 
             if isUploadingOverlayVisible {

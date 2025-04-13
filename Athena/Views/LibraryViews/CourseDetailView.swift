@@ -9,8 +9,8 @@ import SwiftUI
 
 struct CourseDetailView: View {
     let course: Course
-    @StateObject private var viewModel = CourseDetailViewModel()
-    @StateObject private var anotherModel = CourseEditViewModel()
+
+    @StateObject private var courseManager = CourseManager()
     @State private var isPresentingEditView = false
     @State private var showingFilePicker = false
     @State private var selectedFileURL: URL?
@@ -20,14 +20,13 @@ struct CourseDetailView: View {
     var body: some View {
         GeometryReader { geometry in
             VStack(alignment: .leading, spacing: 0) {
-                // Top section - course info
                 VStack(alignment: .leading) {
                     Text(course.name)
                         .font(.headline)
                         .lineLimit(1)
                         .truncationMode(.tail)
 
-                    Text("\(course.semester)")
+                    Text(course.semester)
                         .font(.subheadline)
                         .foregroundStyle(.gray)
 
@@ -36,26 +35,25 @@ struct CourseDetailView: View {
                 .frame(height: geometry.size.height * 0.4)
                 .padding(.bottom)
 
-                // Middle section - course files
                 VStack(alignment: .leading) {
                     Text("Course Files")
                         .font(.headline)
 
                     ZStack {
-                        if viewModel.isLoading || anotherModel.isUploading {
+                        if courseManager.isLoading {
                             ProgressView()
                                 .padding()
-                        } else if let error = viewModel.errorMessage {
+                        } else if let error = courseManager.errorMessage {
                             Text(error)
                                 .font(.subheadline)
                                 .foregroundColor(.red)
-                        } else if viewModel.documents.isEmpty {
+                        } else if courseManager.courseDocuments.isEmpty {
                             Text("No files found for this course.")
                                 .font(.subheadline)
                                 .foregroundColor(.gray)
                         } else {
                             List {
-                                ForEach(viewModel.documents) { document in
+                                ForEach(courseManager.courseDocuments) { document in
                                     HStack {
                                         Image(systemName: "document.fill")
                                             .foregroundStyle(.gray)
@@ -66,12 +64,9 @@ struct CourseDetailView: View {
                                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                         Button(role: .destructive) {
                                             Task {
-                                                anotherModel.deleteDocument(
-                                                    course: course,
-                                                    document: document
-                                                ) {
+                                                courseManager.deleteDocumentFromStorage(course, document) {
                                                     Task {
-                                                        await viewModel.loadDocuments(for: course)
+                                                        await courseManager.loadDocumentsFromStorage(course)
                                                     }
                                                 }
                                             }
@@ -133,15 +128,11 @@ struct CourseDetailView: View {
                 }
 
                 Button {
-                    if let fileURL = selectedFileURL {
+                    if let url = selectedFileURL {
                         Task {
-                            anotherModel.uploadDocument(
-                                for: course,
-                                fileURL: fileURL,
-                                title: documentTitle
-                            ) {
+                            courseManager.uploadDocumentToStorage(documentTitle, url, course) {
                                 Task {
-                                    await viewModel.loadDocuments(for: course)
+                                    await courseManager.loadDocumentsFromStorage(course)
                                 }
                             }
                         }
@@ -186,12 +177,12 @@ struct CourseDetailView: View {
         .onChange(of: isPresentingEditView) { _, newValue in
             if !newValue {
                 Task {
-                    await viewModel.loadDocuments(for: course)
+                    await courseManager.loadDocumentsFromStorage(course)
                 }
             }
         }
         .task {
-            await viewModel.loadDocuments(for: course)
+            await courseManager.loadDocumentsFromStorage(course)
         }
     }
 }

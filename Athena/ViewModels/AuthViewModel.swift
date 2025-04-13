@@ -33,6 +33,10 @@ class AuthViewModel: ObservableObject {
         user = Auth.auth().currentUser
     }
 
+    func getAuthUserId() -> String {
+        user?.uid ?? ""
+    }
+
     func signOut() {
         do {
             try Auth.auth().signOut()

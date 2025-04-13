@@ -63,7 +63,7 @@ let exampleQuizItems: [QuizItem] = [
         title: "Operating Systems Quiz",
         body: "What is a process in Operating Systems?",
         type: .question,
-        courseId: "cse335",
+        courseId: "123e4567-e89b-12d3-a456-426614174001",
         scheduled: true,
         tags: ["Operating Systems", "Processes"],
         options: [
@@ -80,7 +80,7 @@ let exampleQuizItems: [QuizItem] = [
         body:
         "Swift's async/await feature allows you to write asynchronous code that looks like synchronous code. This makes complex operations like network requests much easier to understand and maintain.",
         type: .snippet,
-        courseId: "cse335",
+        courseId: "123e4567-e89b-12d3-a456-426614174000",
         scheduled: true,
         tags: ["Swift", "Concurrency", "Async/Await"]
     ),

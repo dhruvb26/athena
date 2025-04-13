@@ -14,8 +14,7 @@ class OpenAIChatViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var error: String? = nil
 
-    private let apiKey =
-        "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"
+    private let apiKey = Bundle.main.infoDictionary?["OPENAI_API_KEY"] as? String
     private let openAIURL = URL(string: "https://api.openai.com/v1/chat/completions")!
     private var cancellables = Set<AnyCancellable>()
 
@@ -59,7 +58,7 @@ class OpenAIChatViewModel: ObservableObject {
         var request = URLRequest(url: openAIURL)
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer \(apiKey!)", forHTTPHeaderField: "Authorization")
         request.timeoutInterval = 30
 
         let messageHistory = messages.map { message in
@@ -67,7 +66,7 @@ class OpenAIChatViewModel: ObservableObject {
         }
 
         let requestBody: [String: Any] = [
-            "model": "gpt-4", // Replace with valid model name
+            "model": "gpt-4o-mini",
             "messages": messageHistory,
             "stream": true,
         ]

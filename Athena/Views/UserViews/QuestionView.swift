@@ -23,7 +23,7 @@ struct QuestionView: View {
                     }
                     .padding(.horizontal)
                     .padding(.top, 10)
-                    .onChange(of: viewModel.messages.count) { _ in
+                    .onChange(of: viewModel.messages.count) {
                         if let lastMessage = viewModel.messages.last {
                             withAnimation {
                                 scrollView.scrollTo(lastMessage.id, anchor: .bottom)

@@ -13,7 +13,8 @@ struct Document: Identifiable, Codable {
     var url: String?
 }
 
-extension Document { // represents the Firestore object
+// creating Firestore representation
+extension Document {
     func firestoreRepresentation() -> [String: Any] {
         [
             "id": id.uuidString,
@@ -22,3 +23,7 @@ extension Document { // represents the Firestore object
         ]
     }
 }
+
+let exampleDocument = Document(
+    title: "Example Document", url: "https://example.com/assignment1.pdf"
+)

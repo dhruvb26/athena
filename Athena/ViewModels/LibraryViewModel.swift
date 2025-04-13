@@ -17,14 +17,8 @@ class LibraryViewModel: ObservableObject {
     @Published var showingAddCourse = false
     @Published var showingOptions = false
     @Published var selectedCourse: Course?
-
-    private var db: Firestore {
-        Firestore.firestore()
-    }
-
-    private var currentUserId: String? {
-        Auth.auth().currentUser?.uid
-    }
+    private let db = FirestoreManager().db
+    private let currentUserId = Auth.auth().currentUser?.uid
 
     @Published var firestoreCourses: [Course] = []
 

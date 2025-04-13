@@ -5,19 +5,20 @@
 //  Created by Dhruv Bansal on 4/3/25.
 //
 
+import FirebaseFirestore
 import SwiftUI
 import UniformTypeIdentifiers
 
 struct EditCourseView: View {
     @Environment(\.dismiss) var dismiss
-    @StateObject private var viewModel = CourseEditViewModel()
+    @StateObject private var courseManager = CourseManager()
     @State var course: Course
 
     @State private var name: String
     @State private var code: String
     @State private var semester: String
     @State private var notificationType: NotificationType
-    @State private var difficulty: Difficulty?
+    @State private var difficulty: Difficulty
     @State private var isUploadingOverlayVisible = false
 
     init(course: Course) {
@@ -49,9 +50,9 @@ struct EditCourseView: View {
 
                     Section {
                         Picker("Difficulty", selection: $difficulty) {
-                            Text("Easy").tag(Difficulty.easy as Difficulty?)
-                            Text("Medium").tag(Difficulty.medium as Difficulty?)
-                            Text("Hard").tag(Difficulty.hard as Difficulty?)
+                            Text("Easy").tag(Difficulty.easy)
+                            Text("Medium").tag(Difficulty.medium)
+                            Text("Hard").tag(Difficulty.hard)
                         }
                     }
                 }
@@ -59,12 +60,21 @@ struct EditCourseView: View {
                 VStack(spacing: 12) {
                     Button {
                         isUploadingOverlayVisible = true
-                        viewModel.updateCourse(
-                            course, name: name, code: code, semester: semester,
-                            notificationType: notificationType, difficulty: difficulty
-                        ) {
+
+                        let fields: [String: Any] = [
+                            "name": name,
+                            "code": code,
+                            "semester": semester,
+                            "notificationType": notificationType.rawValue,
+                            "difficulty": difficulty.rawValue,
+                        ]
+
+                        courseManager.updateCourseInDB(course.id, fields) {
+                            error in
                             isUploadingOverlayVisible = false
-                            dismiss()
+                            if error == nil {
+                                dismiss()
+                            }
                         }
                     } label: {
                         Text("Save")
@@ -77,7 +87,6 @@ struct EditCourseView: View {
                             .fontWeight(.semibold)
                     }
                     .padding(.horizontal)
-                    .disabled(viewModel.isUploading)
                 }
                 .padding(.bottom)
             }
@@ -100,9 +109,4 @@ struct EditCourseView: View {
             }
         }
     }
-}
-
-#Preview {
-    let previewCourses = exampleCourses
-    return EditCourseView(course: previewCourses.first!)
 }

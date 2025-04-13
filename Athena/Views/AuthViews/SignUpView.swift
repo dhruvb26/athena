@@ -14,7 +14,6 @@ struct SignUpView: View {
     @State private var password = ""
     @State private var confirmPassword = ""
     @State private var errorMessage: String?
-    @State private var showSuccessAlert = false
     @State private var isPasswordVisible = false
     @State private var isConfirmPassWordVisible = false
 
@@ -82,8 +81,6 @@ struct SignUpView: View {
                     )
                     if let error {
                         errorMessage = error
-                    } else {
-                        showSuccessAlert = true
                     }
                 }
             } label: {
@@ -126,11 +123,6 @@ struct SignUpView: View {
             .buttonStyle(.plain)
         }
         .padding()
-        .alert(isPresented: $showSuccessAlert) {
-            Alert(title: Text("Successful"),
-                  message: Text("Your account has been created."),
-                  dismissButton: .default(Text("OK")))
-        }
     }
 }
 

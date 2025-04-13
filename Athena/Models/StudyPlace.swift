@@ -1,8 +1,8 @@
 //
-//  StudyPlaceModel.swift
+//  StudyPlace.swift
 //  Athena
 //
-//  Created on 4/7/25.
+//  Created by Dhruv Bansal on 3/31/25.
 //
 
 import Foundation
@@ -58,7 +58,6 @@ let asuStudyLocations = [
         coordinate: CLLocationCoordinate2D(latitude: 33.4245, longitude: -111.9285),
         description: "Study areas and classrooms."
     ),
-    // Additional study places from web search
     StudyPlace(
         name: "Music Library",
         coordinate: CLLocationCoordinate2D(latitude: 33.4187, longitude: -111.9365),

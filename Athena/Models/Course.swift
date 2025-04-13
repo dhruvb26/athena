@@ -21,18 +21,34 @@ enum NotificationType: String, Codable {
 }
 
 struct Course: Identifiable, Codable {
-    @DocumentID var docID: String? // renamed to docID to not conflict with Firestore
+    @DocumentID var docID: String?
     var name: String
     var code: String
-    var icon: String?
     var semester: String
     var notificationType: NotificationType
-    var difficulty: Difficulty?
+    var difficulty: Difficulty
     var documents: [Document]
     var userId: String
 
     var id: String {
         docID ?? UUID().uuidString
+    }
+}
+
+// creating Firestore representation
+extension Course {
+    func firestoreRepresentation() -> [String: Any] {
+        let representation: [String: Any] = [
+            "name": name,
+            "code": code,
+            "semester": semester,
+            "notificationType": notificationType.rawValue,
+            "userId": userId,
+            "difficulty": difficulty.rawValue,
+            "documents": documents.map { $0.firestoreRepresentation() },
+        ]
+
+        return representation
     }
 }
 
@@ -53,6 +69,6 @@ let exampleCourses: [Course] = [
                 url: "https://example.com/assignment1.pdf"
             ),
         ],
-        userId: "example_user_id"
+        userId: "550e8400-e29b-41d4-a716-446655440000"
     ),
 ]

@@ -8,6 +8,7 @@
 import FirebaseCore
 import FirebaseFirestore
 import GoogleSignIn
+import Logging
 import SwiftUI
 import UserNotifications
 
@@ -17,6 +18,18 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         FirebaseApp.configure()
+
+        LoggingSystem.bootstrap { label in
+            var handler = StreamLogHandler.standardOutput(label: label)
+
+            #if DEBUG
+                handler.logLevel = .trace // Show everything in dev
+            #else
+                handler.logLevel = .warning // Only warning, error, critical in prod
+            #endif
+
+            return handler
+        }
 
         NotificationManager.shared.requestPermission { success, error in
             if success {
