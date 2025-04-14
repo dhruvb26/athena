@@ -3,12 +3,18 @@
 Official repository for Athena. 
 
 ### Setup
-Create a ```Debug.xcconfig``` file in Athena📁 and add the following
+Create a ```Debug.xcconfig``` file in Athena📁 and add the following keys
 
 ```
 OPENAI_API_KEY=
 GEMINI_API_KEY=
 API_BASE_URL=
+```
+
+### Linter
+Install ```swiftformat``` from Homebrew and run the following command from the root folder
+```
+swiftformat . --swiftversion 6
 ```
 
 ### Roadmap
