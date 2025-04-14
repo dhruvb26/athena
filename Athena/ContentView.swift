@@ -8,11 +8,12 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject var authVM = AuthViewModel()
+    @StateObject var authViewModel = AuthViewModel()
+    @StateObject var courseManager = CourseManager()
 
     var body: some View {
         Group {
-            if authVM.user != nil {
+            if authViewModel.user != nil {
                 TabView {
                     NavigationView {
                         QuestionView()
@@ -20,6 +21,7 @@ struct ContentView: View {
                     .tabItem {
                         Label("", systemImage: "magnifyingglass")
                     }
+
                     NavigationView {
                         LibraryView()
                             .navigationTitle("Library")
@@ -27,6 +29,7 @@ struct ContentView: View {
                     .tabItem {
                         Label("", systemImage: "tray.circle")
                     }
+
                     NavigationView {
                         UserView()
                             .navigationTitle("Settings")
@@ -40,11 +43,11 @@ struct ContentView: View {
                 SignUpOrSignInView()
             }
         }
-        .environmentObject(authVM)
+        .environmentObject(authViewModel)
+        .environmentObject(courseManager)
     }
 }
 
 #Preview {
     ContentView()
-        .environmentObject(AuthViewModel())
 }

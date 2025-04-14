@@ -18,7 +18,7 @@ class AIManager {
                 "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
             )
         else {
-            print("Error: Invalid Gemini API endpoint URL")
+            logger.error("Error: Invalid Gemini API endpoint URL")
             return
         }
 
@@ -27,7 +27,7 @@ class AIManager {
         guard let snippetPrompt = loadPrompt(from: "SnippetPrompt"),
               let questionPrompt = loadPrompt(from: "QuestionPrompt")
         else {
-            print("Failed to load prompts")
+            logger.error("Failed to load prompts")
             return
         }
 
@@ -58,19 +58,19 @@ class AIManager {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             request.httpBody = requestJsonData
 
-            let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            let task = URLSession.shared.dataTask(with: request) { [self] data, response, error in
                 if let error {
-                    print("Error making Gemini request: \(error.localizedDescription)")
+                    logger.error("Error making Gemini request: \(error.localizedDescription)")
                     return
                 }
 
                 guard let httpResponse = response as? HTTPURLResponse else {
-                    print("Error: Invalid Gemini response")
+                    logger.error("Error: Invalid Gemini response")
                     return
                 }
 
                 guard httpResponse.statusCode == 200, let data else {
-                    print("Error: Gemini HTTP status code \(httpResponse.statusCode)")
+                    logger.error("Error: Gemini HTTP status code \(httpResponse.statusCode)")
                     return
                 }
 
@@ -84,29 +84,30 @@ class AIManager {
                         let firstPart = parts.first,
                         let text = firstPart["text"] as? String
                     {
-                        print("Response from Gemini: \(text)")
+                        logger.info("Response from Gemini: \(text)")
                     }
                 } catch {
-                    print("Error parsing Gemini response: \(error.localizedDescription)")
+                    logger.error(
+                        "Error parsing Gemini response: \(error.localizedDescription)")
                 }
             }
 
             task.resume()
         } catch {
-            print("Error preparing Gemini request: \(error.localizedDescription)")
+            logger.error("Error preparing Gemini request: \(error.localizedDescription)")
         }
     }
 
     func loadPrompt(from filename: String) -> String? {
         guard let url = Bundle.main.url(forResource: filename, withExtension: "txt") else {
-            print("❌ Failed to find prompt file")
+            logger.error("Failed to find prompt file")
             return nil
         }
 
         do {
             return try String(contentsOf: url, encoding: .utf8)
         } catch {
-            print("❌ Error reading prompt: \(error.localizedDescription)")
+            logger.error("Error reading prompt: \(error.localizedDescription)")
             return nil
         }
     }

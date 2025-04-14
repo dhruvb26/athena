@@ -49,26 +49,14 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     }
 }
 
-final class FirestoreManager: ObservableObject {
-    let db: Firestore
-
-    init() {
-        db = Firestore.firestore()
-    }
-}
-
 @main
 struct MainProjectApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
-    @StateObject var firestoreManager = FirestoreManager() // Initialize FirestoreManager
-    @StateObject var authViewModel = AuthViewModel()
 
     var body: some Scene {
         WindowGroup {
             NavigationView {
                 ContentView()
-                    .environmentObject(firestoreManager)
-                    .environmentObject(authViewModel)
             }
         }
     }

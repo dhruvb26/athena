@@ -11,7 +11,7 @@ struct AddCourseView: View {
     @Environment(\.dismiss) var dismiss
 
     @EnvironmentObject var authViewModel: AuthViewModel
-    @StateObject private var courseManager = CourseManager()
+    @EnvironmentObject var courseManager: CourseManager
 
     @State private var name = ""
     @State private var code = ""
@@ -54,8 +54,6 @@ struct AddCourseView: View {
                     Button {
                         isUploadingOverlayVisible = true
 
-                        let userId = authViewModel.getAuthUserId()
-
                         let course = Course(
                             name: name,
                             code: code,
@@ -63,7 +61,7 @@ struct AddCourseView: View {
                             notificationType: notificationType,
                             difficulty: difficulty,
                             documents: [],
-                            userId: userId
+                            userId: authViewModel.getAuthUserId()
                         )
 
                         courseManager.saveCourseToDB(course) {
@@ -99,4 +97,5 @@ struct AddCourseView: View {
 
 #Preview {
     AddCourseView()
+        .environmentObject(CourseManager())
 }

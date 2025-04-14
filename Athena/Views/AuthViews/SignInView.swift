@@ -12,7 +12,6 @@ struct SignInView: View {
 
     @State private var email = ""
     @State private var password = ""
-    @State private var errorMessage: String?
     @State private var isPasswordVisible = false
 
     var body: some View {
@@ -47,7 +46,8 @@ struct SignInView: View {
                 }
             }
 
-            if let errorMessage {
+            // Use errorMessage from ViewModel
+            if let errorMessage = auth.errorMessage {
                 Text(errorMessage)
                     .foregroundColor(.red)
                     .padding()
@@ -55,9 +55,7 @@ struct SignInView: View {
 
             Button {
                 Task {
-                    if let error = await auth.signInWithEmail(email: email, password: password) {
-                        errorMessage = error
-                    }
+                    await auth.signInWithEmail(email: email, password: password)
                 }
             } label: {
                 Text("Sign In")
@@ -76,9 +74,7 @@ struct SignInView: View {
 
             Button {
                 Task {
-                    if let error = await auth.signInWithGoogle() {
-                        errorMessage = error
-                    }
+                    await auth.signInWithGoogle()
                 }
             } label: {
                 HStack(spacing: 10) {
@@ -104,4 +100,5 @@ struct SignInView: View {
 
 #Preview {
     SignInView()
+        .environmentObject(AuthViewModel())
 }

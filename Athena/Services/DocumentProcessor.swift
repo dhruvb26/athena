@@ -9,8 +9,8 @@ import Foundation
 import Logging
 
 class DocumentProcessor: ObservableObject {
-    private let logger = Logger(label: "athena.DocumentProcessor")
     private let aiManager = AIManager()
+    private let logger = Logger(label: "athena.DocumentProcessor")
 
     func processDocument(_ url: String, _ course: Course) async {
 //        let courseID = course.docID

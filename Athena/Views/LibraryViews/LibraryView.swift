@@ -9,8 +9,53 @@ import SwiftUI
 
 struct LibraryView: View {
     @EnvironmentObject private var auth: AuthViewModel
-    @StateObject private var viewModel = LibraryViewModel()
+    @EnvironmentObject var courseManager: CourseManager
+
+    @State private var searchText = ""
+    @State private var groupingOption: GroupingOption = .semester
     @State private var showingMapView = false
+    @State private var showingAddCourse = false
+    @State private var showingOptions = false
+    @State private var selectedCourse: Course?
+
+    enum GroupingOption: String, CaseIterable, Identifiable {
+        case alphabetical = "Alphabetical"
+        case semester = "Semester"
+        var id: String { rawValue }
+    }
+
+    var filteredCourses: [Course] {
+        if searchText.isEmpty {
+            courseManager.userCourses
+        } else {
+            courseManager.userCourses.filter {
+                $0.name.localizedCaseInsensitiveContains(searchText)
+            }
+        }
+    }
+
+    var groupedCourses: [String: [Course]] {
+        if groupingOption == .alphabetical {
+            Dictionary(grouping: filteredCourses) { course in
+                String(course.name.prefix(1)).uppercased()
+            }
+        } else {
+            Dictionary(grouping: filteredCourses) { course in
+                course.semester
+            }
+        }
+    }
+
+    var sortedGroupKeys: [String] {
+        let keys = groupedCourses.keys.sorted()
+        return groupingOption == .alphabetical
+            ? keys
+            : keys.sorted {
+                let num1 = Int($0.components(separatedBy: " ").last ?? "0") ?? 0
+                let num2 = Int($1.components(separatedBy: " ").last ?? "0") ?? 0
+                return num1 < num2
+            }
+    }
 
     var body: some View {
         ZStack {
@@ -18,8 +63,8 @@ struct LibraryView: View {
                 searchBarView
 
                 HStack {
-                    Picker("Group by", selection: $viewModel.groupingOption) {
-                        ForEach(LibraryViewModel.GroupingOption.allCases) { option in
+                    Picker("Group by", selection: $groupingOption) {
+                        ForEach(GroupingOption.allCases) { option in
                             Text(option.rawValue).tag(option)
                         }
                     }
@@ -27,7 +72,7 @@ struct LibraryView: View {
                     Spacer()
 
                     Button {
-                        viewModel.showingAddCourse = true
+                        showingAddCourse = true
                     } label: {
                         Image(systemName: "plus")
                             .font(.system(size: 20))
@@ -43,19 +88,18 @@ struct LibraryView: View {
                 showMapButton
             }
         }
-
         .tint(Color.secondaryPurple)
-        .sheet(isPresented: $viewModel.showingAddCourse) {
+        .sheet(isPresented: $showingAddCourse) {
             AddCourseView()
         }
         .confirmationDialog(
-            "Options", isPresented: $viewModel.showingOptions, presenting: viewModel.selectedCourse
+            "Options", isPresented: $showingOptions, presenting: selectedCourse
         ) { course in
             optionsButtons(for: course)
         }
         .onAppear {
             Task {
-                await viewModel.fetchCourses()
+                await courseManager.loadCoursesFromDB()
             }
         }
         .navigationTitle("Library")
@@ -70,13 +114,13 @@ struct LibraryView: View {
         HStack {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(.gray)
-            TextField("Search courses", text: $viewModel.searchText)
+            TextField("Search courses", text: $searchText)
                 .autocapitalization(.none)
                 .disableAutocorrection(true)
 
-            if !viewModel.searchText.isEmpty {
+            if !searchText.isEmpty {
                 Button(action: {
-                    viewModel.searchText = ""
+                    searchText = ""
                 }) {
                     Image(systemName: "xmark.circle.fill")
                         .foregroundColor(.gray)
@@ -95,9 +139,9 @@ struct LibraryView: View {
     @ViewBuilder
     private var courseListView: some View {
         List {
-            ForEach(viewModel.sortedGroupKeys, id: \.self) { key in
+            ForEach(sortedGroupKeys, id: \.self) { key in
                 Section(header: Text(key)) {
-                    ForEach(viewModel.groupedCourses[key] ?? []) { course in
+                    ForEach(groupedCourses[key] ?? []) { course in
                         NavigationLink(destination: CourseDetailView(course: course)) {
                             courseRow(for: course)
                         }
@@ -136,7 +180,7 @@ struct LibraryView: View {
 
     private func deleteButton(for course: Course) -> some View {
         Button(role: .destructive) {
-            viewModel.deleteCourse(course)
+            courseManager.deleteCourseFromDB(course)
         } label: {
             Label("Delete", systemImage: "trash")
         }
@@ -144,8 +188,8 @@ struct LibraryView: View {
 
     private func optionsButton(for course: Course) -> some View {
         Button {
-            viewModel.selectedCourse = course
-            viewModel.showingOptions = true
+            selectedCourse = course
+            showingOptions = true
         } label: {
             Image(systemName: "ellipsis")
         }
@@ -187,4 +231,5 @@ struct LibraryView: View {
 
 #Preview {
     LibraryView()
+        .environmentObject(CourseManager())
 }

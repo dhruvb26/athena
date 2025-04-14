@@ -12,7 +12,7 @@ class OpenAIChatViewModel: ObservableObject {
     @Published var messages: [ChatMessage] = []
     @Published var inputMessage: String = ""
     @Published var isLoading: Bool = false
-    @Published var error: String? = nil
+    @Published var errorMessage: String? = nil
 
     private let apiKey = Bundle.main.infoDictionary?["OPENAI_API_KEY"] as? String
     private let openAIURL = URL(string: "https://api.openai.com/v1/chat/completions")!
@@ -53,7 +53,7 @@ class OpenAIChatViewModel: ObservableObject {
         inputMessage = ""
 
         isLoading = true
-        error = nil
+        errorMessage = nil
 
         var request = URLRequest(url: openAIURL)
         request.httpMethod = "POST"
@@ -74,7 +74,7 @@ class OpenAIChatViewModel: ObservableObject {
         do {
             request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
         } catch {
-            self.error = "Failed to encode request: \(error.localizedDescription)"
+            errorMessage = "Failed to encode request: \(error.localizedDescription)"
             isLoading = false
             return
         }
@@ -105,7 +105,7 @@ class OpenAIChatViewModel: ObservableObject {
                         self.isLoading = false
 
                         if case let .failure(error) = completion {
-                            self.error = error.localizedDescription
+                            self.errorMessage = error.localizedDescription
 
                             if let lastMessage = self.messages.last, !lastMessage.isUser {
                                 self.messages.removeLast()
@@ -136,8 +136,7 @@ class OpenAIChatViewModel: ObservableObject {
                                 responseText += content
 
                                 DispatchQueue.main.async {
-                                    if let lastIndex = self.messages.lastIndex(where: { !$0.isUser }
-                                    ) {
+                                    if let lastIndex = self.messages.lastIndex(where: { !$0.isUser }) {
                                         self.messages[lastIndex].content += content
                                     }
                                 }
@@ -151,6 +150,6 @@ class OpenAIChatViewModel: ObservableObject {
 
     func clearChat() {
         messages.removeAll()
-        error = nil
+        errorMessage = nil
     }
 }

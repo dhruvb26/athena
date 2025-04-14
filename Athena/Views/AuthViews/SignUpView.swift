@@ -13,7 +13,6 @@ struct SignUpView: View {
     @State private var email = ""
     @State private var password = ""
     @State private var confirmPassword = ""
-    @State private var errorMessage: String?
     @State private var isPasswordVisible = false
     @State private var isConfirmPassWordVisible = false
 
@@ -51,10 +50,17 @@ struct SignUpView: View {
 
             if !password.isEmpty {
                 HStack(spacing: 0) {
-                    SecureField("Confirm Password", text: $confirmPassword)
-                        .padding()
-                        .cornerRadius(8)
-                        .padding(.horizontal, 15)
+                    if isConfirmPassWordVisible {
+                        TextField("Confirm Password", text: $confirmPassword)
+                            .padding()
+                            .cornerRadius(8)
+                            .padding(.horizontal, 15)
+                    } else {
+                        SecureField("Confirm Password", text: $confirmPassword)
+                            .padding()
+                            .cornerRadius(8)
+                            .padding(.horizontal, 15)
+                    }
 
                     Button(action: {
                         isConfirmPassWordVisible.toggle()
@@ -66,7 +72,7 @@ struct SignUpView: View {
                 }
             }
 
-            if let errorMessage {
+            if let errorMessage = auth.errorMessage {
                 Text(errorMessage)
                     .foregroundColor(.red)
                     .padding()
@@ -74,14 +80,11 @@ struct SignUpView: View {
 
             Button {
                 Task {
-                    let error = await auth.createUserWithEmail(
+                    await auth.createUserWithEmail(
                         email: email,
                         password: password,
                         confirmPassword: confirmPassword
                     )
-                    if let error {
-                        errorMessage = error
-                    }
                 }
             } label: {
                 Text("Sign Up")
@@ -100,9 +103,7 @@ struct SignUpView: View {
 
             Button {
                 Task {
-                    if let error = await auth.signInWithGoogle() {
-                        errorMessage = error
-                    }
+                    await auth.signInWithGoogle()
                 }
             } label: {
                 HStack(spacing: 10) {
@@ -128,4 +129,5 @@ struct SignUpView: View {
 
 #Preview {
     SignUpView()
+        .environmentObject(AuthViewModel())
 }

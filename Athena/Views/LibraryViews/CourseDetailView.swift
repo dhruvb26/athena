@@ -10,7 +10,7 @@ import SwiftUI
 struct CourseDetailView: View {
     let course: Course
 
-    @StateObject private var courseManager = CourseManager()
+    @EnvironmentObject var courseManager: CourseManager
     @State private var isPresentingEditView = false
     @State private var showingFilePicker = false
     @State private var selectedFileURL: URL?
@@ -190,4 +190,5 @@ struct CourseDetailView: View {
 #Preview {
     let previewCourses = exampleCourses
     CourseDetailView(course: previewCourses.first!)
+        .environmentObject(CourseManager())
 }

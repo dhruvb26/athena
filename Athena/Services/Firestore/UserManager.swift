@@ -10,7 +10,7 @@ import FirebaseFirestore
 import Logging
 
 class UserManager {
-    private let db = FirestoreManager().db
+    private let db = Firestore.firestore()
     private let logger = Logger(label: "athena.UserManager")
 
     func saveUserToDB(_ user: User) {

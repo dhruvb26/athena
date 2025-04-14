@@ -11,9 +11,9 @@ import UniformTypeIdentifiers
 
 struct EditCourseView: View {
     @Environment(\.dismiss) var dismiss
-    @StateObject private var courseManager = CourseManager()
-    @State var course: Course
+    @EnvironmentObject var courseManager: CourseManager
 
+    @State var course: Course
     @State private var name: String
     @State private var code: String
     @State private var semester: String
@@ -70,11 +70,8 @@ struct EditCourseView: View {
                         ]
 
                         courseManager.updateCourseInDB(course.id, fields) {
-                            error in
                             isUploadingOverlayVisible = false
-                            if error == nil {
-                                dismiss()
-                            }
+                            dismiss()
                         }
                     } label: {
                         Text("Save")

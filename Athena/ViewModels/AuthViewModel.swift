@@ -9,9 +9,14 @@ import FirebaseAuth
 import FirebaseCore
 import Foundation
 import GoogleSignIn
+import Logging
 
 class AuthViewModel: ObservableObject {
+    private let logger = Logger(label: "athena.AuthViewModel")
+
     @Published var user: User?
+    @Published var isLoading = false
+    @Published var errorMessage: String?
 
     private var authStateDidChangeListenerHandle: AuthStateDidChangeListenerHandle?
 
@@ -19,7 +24,6 @@ class AuthViewModel: ObservableObject {
         authStateDidChangeListenerHandle = Auth.auth().addStateDidChangeListener { _, user in
             self.user = user
         }
-
         getAuthUser()
     }
 
@@ -42,31 +46,41 @@ class AuthViewModel: ObservableObject {
             try Auth.auth().signOut()
             user = nil
         } catch {
-            print("Error signing out: \(error.localizedDescription)")
+            logger.error("Error signing out: \(error.localizedDescription)")
+            errorMessage = error.localizedDescription
         }
     }
 
-    func createUserWithEmail(email: String, password: String, confirmPassword: String) async -> String? {
+    func createUserWithEmail(email: String, password: String, confirmPassword: String) async {
+        errorMessage = nil
+
         guard !email.isEmpty, !password.isEmpty else {
-            return "Email and password must not be empty."
+            errorMessage = "Email and password must not be empty."
+            return
         }
 
         guard password == confirmPassword else {
-            return "Passwords do not match."
+            errorMessage = "Passwords do not match."
+            return
         }
 
         do {
+            isLoading = true
             let result = try await Auth.auth().createUser(withEmail: email, password: password)
             user = result.user
-            return nil
         } catch {
-            return error.localizedDescription
+            logger.error("Error creating user: \(error.localizedDescription)")
+            errorMessage = error.localizedDescription
         }
+        isLoading = false
     }
 
-    func signInWithGoogle() async -> String? {
+    func signInWithGoogle() async {
+        errorMessage = nil
+
         guard let clientID = FirebaseApp.app()?.options.clientID else {
-            return "An error occurred: missing client ID."
+            errorMessage = "An error occurred: missing client ID."
+            return
         }
 
         let config = GIDConfiguration(clientID: clientID)
@@ -75,14 +89,18 @@ class AuthViewModel: ObservableObject {
         guard let windowScene = await UIApplication.shared.connectedScenes.first as? UIWindowScene,
               let rootViewController = await windowScene.windows.first?.rootViewController
         else {
-            return "An error occurred: could not access root view controller."
+            errorMessage = "An error occurred: could not access root view controller."
+            return
         }
 
         do {
+            isLoading = true
             let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController)
 
             guard let idToken = result.user.idToken?.tokenString else {
-                return "An error occurred: failed to retrieve Google ID token."
+                errorMessage = "An error occurred: failed to retrieve Google ID token."
+                isLoading = false
+                return
             }
 
             let accessToken = result.user.accessToken.tokenString
@@ -90,24 +108,29 @@ class AuthViewModel: ObservableObject {
 
             let authResult = try await Auth.auth().signIn(with: credential)
             user = authResult.user
-
-            return nil
         } catch {
-            return "Sign-In failed: \(error.localizedDescription)"
+            logger.error("Sign-In with Google failed: \(error.localizedDescription)")
+            errorMessage = "Sign-In failed: \(error.localizedDescription)"
         }
+        isLoading = false
     }
 
-    func signInWithEmail(email: String, password: String) async -> String? {
+    func signInWithEmail(email: String, password: String) async {
+        errorMessage = nil
+
         guard !email.isEmpty, !password.isEmpty else {
-            return "Please fill in all fields."
+            errorMessage = "Please fill in all fields."
+            return
         }
 
         do {
+            isLoading = true
             let result = try await Auth.auth().signIn(withEmail: email, password: password)
             user = result.user
-            return nil
         } catch {
-            return "Sign-In failed: \(error.localizedDescription)"
+            logger.error("Sign-In failed: \(error.localizedDescription)")
+            errorMessage = "Sign-In failed: \(error.localizedDescription)"
         }
+        isLoading = false
     }
 }
