@@ -64,10 +64,14 @@ struct CourseDetailView: View {
                                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                         Button(role: .destructive) {
                                             Task {
-                                                courseManager.deleteDocumentFromStorage(course, document) {
-                                                    Task {
-                                                        await courseManager.loadDocumentsFromStorage(course)
-                                                    }
+                                                do {
+                                                    try await courseManager
+                                                        .deleteDocumentFromStorage(course, document)
+                                                    await courseManager.loadDocumentsFromStorage(
+                                                        course)
+                                                } catch {
+                                                    courseManager.errorMessage =
+                                                        error.localizedDescription
                                                 }
                                             }
                                         } label: {
@@ -130,13 +134,16 @@ struct CourseDetailView: View {
                 Button {
                     if let url = selectedFileURL {
                         Task {
-                            courseManager.uploadDocumentToStorage(documentTitle, url, course) {
-                                Task {
-                                    await courseManager.loadDocumentsFromStorage(course)
-                                }
+                            do {
+                                try await courseManager.uploadDocumentToStorage(
+                                    documentTitle, url, course
+                                )
+                                await courseManager.loadDocumentsFromStorage(course)
+                                isShowingDocumentSheet = false
+                            } catch {
+                                courseManager.errorMessage = error.localizedDescription
                             }
                         }
-                        isShowingDocumentSheet = false
                     }
                 } label: {
                     Text("Upload Document")

@@ -22,22 +22,30 @@ class CourseManager: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String? = nil
 
-    func saveCourseToDB(_ course: Course, completion: @escaping () -> Void) {
+    @MainActor
+    func saveCourseToDB(_ course: Course) async {
         isLoading = true
 
-        db.collection("courses").document(course.id).setData(course.firestoreRepresentation()) {
-            error in
-            self.isLoading = false
-            if let error {
-                self.logger.error("Failed to save course: \(error.localizedDescription)")
+        do {
+            let docRef = db.collection("courses").document(course.id)
+            try await docRef.setData(course.firestoreRepresentation())
+
+            let docSnapshot = try await docRef.getDocument()
+            if let savedCourse = try? docSnapshot.data(as: Course.self) {
+                userCourses.append(savedCourse)
+                logger.info("Course saved to Firestore successfully")
             } else {
-                self.logger.info("Course saved to Firestore successfully")
+                logger.error("Failed to decode saved course data")
             }
 
-            completion()
+        } catch {
+            logger.error("Failed to save course: \(error.localizedDescription)")
         }
+
+        isLoading = false
     }
 
+    @MainActor
     func deleteCourseFromDB(_ course: Course) {
         guard let id = course.docID else {
             logger.error("Failed to delete course: Invalid course ID")
@@ -46,32 +54,41 @@ class CourseManager: ObservableObject {
 
         isLoading = true
 
-        db.collection("courses").document(id).delete { error in
-            self.isLoading = false
+        db.collection("courses").document(id).delete { [weak self] error in
+            guard let self else { return }
+
+            isLoading = false
             if let error {
-                self.logger.error("Failed to delete course: \(error.localizedDescription)")
+                logger.error("Failed to delete course: \(error.localizedDescription)")
             } else {
-                self.logger.info("Course deleted successfully")
+                userCourses.removeAll { $0.id == course.id }
+                logger.info("Course deleted successfully")
             }
         }
     }
 
-    func updateCourseInDB(
-        _ courseID: String, _ fields: [String: Any], completion: @escaping () -> Void
-    ) {
+    @MainActor
+    func updateCourseInDB(_ courseID: String, _ fields: [String: Any]) async {
         isLoading = true
         let courseRef = db.collection("courses").document(courseID)
 
-        courseRef.updateData(fields) { error in
-            self.isLoading = false
-            if let error {
-                self.logger.error("Failed to update course: \(error.localizedDescription)")
-            } else {
-                self.logger.info("Course updated successfully")
+        do {
+            try await courseRef.updateData(fields)
+
+            if let index = userCourses.firstIndex(where: { $0.id == courseID }) {
+                // Get the updated course data
+                let updatedDoc = try await courseRef.getDocument()
+                if let updatedCourse = try? updatedDoc.data(as: Course.self) {
+                    userCourses[index] = updatedCourse
+                }
             }
 
-            completion()
+            logger.info("Course updated successfully")
+        } catch {
+            logger.error("Failed to update course: \(error.localizedDescription)")
         }
+
+        isLoading = false
     }
 
     @MainActor
@@ -99,150 +116,108 @@ class CourseManager: ObservableObject {
         }
     }
 
-    func uploadDocumentToStorage(
-        _ title: String, _ url: URL, _ course: Course, completion _: @escaping () -> Void
-    ) {
+    @MainActor
+    func uploadDocumentToStorage(_ title: String, _ url: URL, _ course: Course) async throws {
         isLoading = true
 
+        // Request access to security-scoped file URL
         guard url.startAccessingSecurityScopedResource() else {
             isLoading = false
             logger.error("Could not access the selected file")
-            return
+            throw NSError(
+                domain: "FileAccessError", code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "Could not access the selected file"]
+            )
+        }
+
+        defer {
+            // Always stop access when done
+            url.stopAccessingSecurityScopedResource()
         }
 
         do {
+            // Access the file data only inside the security scope
             let fileData = try Data(contentsOf: url)
             let docRef = storageRef.child("docs/\(title)")
             let courseID = course.docID ?? ""
 
-            docRef.putData(fileData, metadata: nil) { _, error in
-                url.stopAccessingSecurityScopedResource()
+            _ = try await docRef.putDataAsync(fileData)
+            let downloadURL = try await docRef.downloadURL().absoluteString
 
-                if let error {
-                    self.isLoading = false
-                    self.logger.error("Error uploading document: \(error.localizedDescription)")
-                    return
-                }
+            logger.info("Document uploaded successfully")
 
-                docRef.downloadURL { [weak self] url, error in
-                    guard let self else { return }
+            let newDocument = Document(title: title, url: downloadURL)
 
-                    if let error {
-                        isLoading = false
-                        logger.error(
-                            "Error getting download URL: \(error.localizedDescription)")
-                        return
-                    }
+            let snapshot = try await db.collection("courses").document(courseID).getDocument()
 
-                    guard let downloadURL = url?.absoluteString else {
-                        isLoading = false
-                        logger.error("Failed to get download URL")
-                        return
-                    }
-
-                    logger.info("Document uploaded successfully")
-                    let newDocument = Document(title: title, url: downloadURL)
-
-                    db.collection("courses").document(courseID).getDocument {
-                        snapshot, error in
-                        if let error {
-                            self.isLoading = false
-                            self.logger.error(
-                                "Error fetching course: \(error.localizedDescription)")
-                            return
-                        }
-
-                        if let data = snapshot?.data(),
-                           var existingDocuments = data["documents"] as? [[String: Any]]
-                        {
-                            existingDocuments.append(newDocument.firestoreRepresentation())
-
-                            self.updateCourseInDB(courseID, ["documents": existingDocuments]) {
-                                self.isLoading = false
-                                if let error {
-                                    self.logger.error(
-                                        "Error updating course documents: \(error.localizedDescription)"
-                                    )
-                                } else {
-                                    self.logger.info("Course documents updated successfully")
-                                }
-                            }
-                        } else {
-                            self.isLoading = false
-                            self.logger.error("Failed to process course documents")
-                        }
-                    }
-                }
+            if let data = snapshot.data(),
+               var existingDocuments = data["documents"] as? [[String: Any]]
+            {
+                existingDocuments.append(newDocument.firestoreRepresentation())
+                await updateCourseInDB(courseID, ["documents": existingDocuments])
+                logger.info("Course documents updated successfully")
+            } else {
+                logger.error("Failed to process course documents")
+                throw NSError(
+                    domain: "DocumentProcessError", code: -1,
+                    userInfo: [NSLocalizedDescriptionKey: "Failed to process course documents"]
+                )
             }
+
         } catch {
-            url.stopAccessingSecurityScopedResource()
-            isLoading = false
-            logger.error("Error reading file data: \(error.localizedDescription)")
+            logger.error("Error in document upload process: \(error.localizedDescription)")
+            throw error
         }
+
+        isLoading = false
     }
 
-    func deleteDocumentFromStorage(
-        _ course: Course, _ document: Document, completion: @escaping () -> Void
-    ) {
+    @MainActor
+    func deleteDocumentFromStorage(_ course: Course, _ document: Document) async throws {
         isLoading = true
 
         guard let courseId = course.docID else {
             isLoading = false
             logger.error("Invalid course ID while attempting to delete document")
-            return
+            throw NSError(
+                domain: "CourseIDError", code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "Invalid course ID"]
+            )
         }
 
-        db.collection("courses").document(courseId).getDocument { documentSnapshot, error in
-            if let error {
-                self.isLoading = false
-                self.logger.error("Error fetching course: \(error.localizedDescription)")
-                return
-            }
+        do {
+            let documentSnapshot = try await db.collection("courses").document(courseId)
+                .getDocument() // This function should be marked with 'async'
 
-            guard let documentSnapshot, documentSnapshot.exists,
+            guard documentSnapshot.exists,
                   var courseData = try? documentSnapshot.data(as: Course.self)
             else {
-                self.isLoading = false
-                self.logger.error("Failed to fetch or decode course data")
-                return
+                isLoading = false
+                logger.error("Failed to fetch or decode course data")
+                throw NSError(
+                    domain: "CourseDataError", code: -1,
+                    userInfo: [NSLocalizedDescriptionKey: "Failed to fetch or decode course data"]
+                )
             }
 
             courseData.documents = courseData.documents.filter { $0.id != document.id }
 
-            do {
-                try self.db.collection("courses").document(courseId).setData(
-                    from: courseData, merge: true
-                ) { error in
-                    if let error {
-                        self.isLoading = false
-                        self.logger.error("Error updating course: \(error.localizedDescription)")
-                        return
-                    }
+            try await db.collection("courses").document(courseId).setData(
+                from: courseData, merge: true)
 
-                    if let fileURL = document.url {
-                        let ref = self.storage.reference(forURL: fileURL)
-                        ref.delete { error in
-                            self.isLoading = false
-                            if let error {
-                                self.logger.error(
-                                    "Error deleting file from storage: \(error.localizedDescription)"
-                                )
-                            } else {
-                                self.logger.info("Document deleted successfully")
-                                completion()
-                            }
-                        }
-                    } else {
-                        self.isLoading = false
-                        self.logger.info("Document reference updated successfully")
-                        completion()
-                    }
-                }
-            } catch {
-                self.isLoading = false
-                self.logger.error("Error encoding course data: \(error.localizedDescription)")
+            if let fileURL = document.url {
+                let ref = storage.reference(forURL: fileURL)
+                try await ref.delete()
+                logger.info("Document deleted successfully")
+            } else {
+                logger.info("Document reference updated successfully")
             }
+        } catch {
+            logger.error("Error in document deletion process: \(error.localizedDescription)")
+            throw error
         }
+
+        isLoading = false
     }
 
     @MainActor

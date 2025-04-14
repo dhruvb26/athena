@@ -69,7 +69,8 @@ struct EditCourseView: View {
                             "difficulty": difficulty.rawValue,
                         ]
 
-                        courseManager.updateCourseInDB(course.id, fields) {
+                        Task {
+                            await courseManager.updateCourseInDB(course.id, fields)
                             isUploadingOverlayVisible = false
                             dismiss()
                         }

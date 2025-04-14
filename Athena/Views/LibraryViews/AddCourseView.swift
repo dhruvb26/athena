@@ -64,7 +64,8 @@ struct AddCourseView: View {
                             userId: authViewModel.getAuthUserId()
                         )
 
-                        courseManager.saveCourseToDB(course) {
+                        Task {
+                            await courseManager.saveCourseToDB(course)
                             isUploadingOverlayVisible = false
                             dismiss()
                         }
