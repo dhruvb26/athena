@@ -12,7 +12,8 @@ API_BASE_URL=
 ```
 
 ### Roadmap
-- [ ] Add swift-log to all files
+- [x] Add swift-log to all files
+- [ ] Use async/await instead of completion handlers
 - [ ] Remove unnecessary completion handlers
 - [ ] Add quiz item fetching and notification scheduling logic
 - [ ] Use FirebaseMessaging for push notifications

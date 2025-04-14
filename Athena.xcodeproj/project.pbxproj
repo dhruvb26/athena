@@ -63,6 +63,7 @@
 		FCBAB33F2D9895D4007FC275 /* Exceptions for "Athena" folder in "Athena" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Debug.xcconfig,
 				Info.plist,
 			);
 			target = FC62213C2D9356C9005093BF /* Athena */;
@@ -250,7 +251,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1620;
-				LastUpgradeCheck = 1620;
+				LastUpgradeCheck = 1630;
 				TargetAttributes = {
 					FC62213C2D9356C9005093BF = {
 						CreatedOnToolsVersion = 16.2;
