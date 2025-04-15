@@ -5,22 +5,50 @@
 //  Created by Dhruv Bansal on 4/12/25.
 //
 
+import FirebaseFirestore
 import Foundation
 import Logging
 
 class DocumentProcessor: ObservableObject {
     private let aiManager = AIManager()
     private let logger = Logger(label: "athena.DocumentProcessor")
+    private let db = Firestore.firestore()
 
     func processDocument(_ url: String, _ course: Course) async {
-//        let courseID = course.docID
+        let courseID = course.docID
         let notificationType = course.notificationType
 
         do {
             let extractedText = try await convertToText(url)
-            // TODO: Process the extracted text further based on courseID and notificationType
-            aiManager.makeGeminiCall(extractedText, notificationType)
+            do {
+                let geminiResponse = try await aiManager.makeGeminiCall(
+                    extractedText, notificationType
+                )
+                logger.info("Processed document result: \(geminiResponse)")
 
+                do {
+                    if let quizItems = geminiResponse as? [[String: Any]] {
+                        for var item in quizItems {
+                            item["courseID"] = courseID
+                            do {
+                                try await db.collection("quizItems").addDocument(data: item)
+                                logger.info("Successfully saved quiz item to Firestore")
+                            } catch {
+                                logger.error(
+                                    "Failed to save quiz item to Firestore: \(error.localizedDescription)"
+                                )
+                            }
+                        }
+                    } else {
+                        logger.error("Gemini response was not in expected format")
+                    }
+                } catch {
+                    logger.error("Failed to parse Gemini response: \(error.localizedDescription)")
+                }
+
+            } catch {
+                logger.error("Failed to process with Gemini: \(error.localizedDescription)")
+            }
         } catch {
             logger.error("Failed to process document: \(error.localizedDescription)")
         }
@@ -28,7 +56,9 @@ class DocumentProcessor: ObservableObject {
 
     func convertToText(_ url: String) async throws -> String {
         // make the api call
-        guard let baseURL = URL(string: "https://437d-2607-fb91-8e3f-cc10-38fc-aaa7-fb88-2803.ngrok-free.app/ocr")
+        guard
+            let baseURL = URL(
+                string: "https://437d-2607-fb91-8e3f-cc10-38fc-aaa7-fb88-2803.ngrok-free.app/ocr")
         else {
             logger.error("Failed to construct base URL")
             throw NSError(

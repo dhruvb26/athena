@@ -11,7 +11,9 @@ import Logging
 class AIManager {
     private let logger = Logger(label: "athena.AIManager")
 
-    func makeGeminiCall(_ content: String, _ notificationType: NotificationType) {
+    func makeGeminiCall(_ content: String, _ notificationType: NotificationType) async throws
+        -> String
+    {
         guard
             let endpoint = URL(
                 string:
@@ -19,7 +21,10 @@ class AIManager {
             )
         else {
             logger.error("Error: Invalid Gemini API endpoint URL")
-            return
+            throw NSError(
+                domain: "AIManager", code: 1,
+                userInfo: [NSLocalizedDescriptionKey: "Invalid endpoint URL"]
+            )
         }
 
         let apiKey = Bundle.main.infoDictionary?["GEMINI_API_KEY"] as? String
@@ -28,7 +33,10 @@ class AIManager {
               let questionPrompt = loadPrompt(from: "QuestionPrompt")
         else {
             logger.error("Failed to load prompts")
-            return
+            throw NSError(
+                domain: "AIManager", code: 2,
+                userInfo: [NSLocalizedDescriptionKey: "Failed to load prompts"]
+            )
         }
 
         let prompt = notificationType == .snippet ? snippetPrompt : questionPrompt
@@ -47,56 +55,51 @@ class AIManager {
             ],
         ]
 
-        do {
-            let requestJsonData = try JSONSerialization.data(withJSONObject: requestBody)
+        let requestJsonData = try JSONSerialization.data(withJSONObject: requestBody)
 
-            var urlComponents = URLComponents(url: endpoint, resolvingAgainstBaseURL: false)!
-            urlComponents.queryItems = [URLQueryItem(name: "key", value: apiKey)]
+        var urlComponents = URLComponents(url: endpoint, resolvingAgainstBaseURL: false)!
+        urlComponents.queryItems = [URLQueryItem(name: "key", value: apiKey)]
 
-            var request = URLRequest(url: urlComponents.url!)
-            request.httpMethod = "POST"
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            request.httpBody = requestJsonData
+        var request = URLRequest(url: urlComponents.url!)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = requestJsonData
 
-            let task = URLSession.shared.dataTask(with: request) { [self] data, response, error in
-                if let error {
-                    logger.error("Error making Gemini request: \(error.localizedDescription)")
-                    return
-                }
+        let (data, response) = try await URLSession.shared.data(for: request)
 
-                guard let httpResponse = response as? HTTPURLResponse else {
-                    logger.error("Error: Invalid Gemini response")
-                    return
-                }
-
-                guard httpResponse.statusCode == 200, let data else {
-                    logger.error("Error: Gemini HTTP status code \(httpResponse.statusCode)")
-                    return
-                }
-
-                do {
-                    if let jsonResponse = try JSONSerialization.jsonObject(with: data)
-                        as? [String: Any],
-                        let candidates = jsonResponse["candidates"] as? [[String: Any]],
-                        let firstCandidate = candidates.first,
-                        let content = firstCandidate["content"] as? [String: Any],
-                        let parts = content["parts"] as? [[String: Any]],
-                        let firstPart = parts.first,
-                        let text = firstPart["text"] as? String
-                    {
-                        let parsedText = cleanContent(text)
-                        logger.info("Response from Gemini: \(parsedText)")
-                    }
-                } catch {
-                    logger.error(
-                        "Error parsing Gemini response: \(error.localizedDescription)")
-                }
-            }
-
-            task.resume()
-        } catch {
-            logger.error("Error preparing Gemini request: \(error.localizedDescription)")
+        guard let httpResponse = response as? HTTPURLResponse else {
+            logger.error("Error: Invalid Gemini response")
+            throw NSError(
+                domain: "AIManager", code: 3,
+                userInfo: [NSLocalizedDescriptionKey: "Invalid response"]
+            )
         }
+
+        guard httpResponse.statusCode == 200 else {
+            logger.error("Error: Gemini HTTP status code \(httpResponse.statusCode)")
+            throw NSError(
+                domain: "AIManager", code: 4,
+                userInfo: [NSLocalizedDescriptionKey: "HTTP error \(httpResponse.statusCode)"]
+            )
+        }
+
+        guard let jsonResponse = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let candidates = jsonResponse["candidates"] as? [[String: Any]],
+              let firstCandidate = candidates.first,
+              let content = firstCandidate["content"] as? [String: Any],
+              let parts = content["parts"] as? [[String: Any]],
+              let firstPart = parts.first,
+              let text = firstPart["text"] as? String
+        else {
+            throw NSError(
+                domain: "AIManager", code: 5,
+                userInfo: [NSLocalizedDescriptionKey: "Invalid response format"]
+            )
+        }
+
+        let parsedText = cleanContent(text)
+
+        return parsedText
     }
 
     private func loadPrompt(from filename: String) -> String? {
