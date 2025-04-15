@@ -145,8 +145,11 @@ class CourseManager: ObservableObject {
             let downloadURL = try await docRef.downloadURL().absoluteString
 
             logger.info("Document uploaded successfully")
-
             let newDocument = Document(title: title, url: downloadURL)
+
+            // Add document processing here
+            let documentProcessor = DocumentProcessor()
+            await documentProcessor.processDocument(downloadURL, course)
 
             let snapshot = try await db.collection("courses").document(courseID).getDocument()
 

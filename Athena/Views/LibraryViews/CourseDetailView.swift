@@ -130,32 +130,37 @@ struct CourseDetailView: View {
                         }
                     }
                 }
+                if courseManager.isLoading {
+                    ProgressView()
+                        .padding()
+                } else {
+                    Button {
+                        if let url = selectedFileURL {
+                            Task {
+                                do {
+                                    try await courseManager.uploadDocumentToStorage(
+                                        documentTitle, url, course
+                                    )
+                                    await courseManager.loadDocumentsFromStorage(course)
+                                    isShowingDocumentSheet = false
 
-                Button {
-                    if let url = selectedFileURL {
-                        Task {
-                            do {
-                                try await courseManager.uploadDocumentToStorage(
-                                    documentTitle, url, course
-                                )
-                                await courseManager.loadDocumentsFromStorage(course)
-                                isShowingDocumentSheet = false
-                            } catch {
-                                courseManager.errorMessage = error.localizedDescription
+                                } catch {
+                                    courseManager.errorMessage = error.localizedDescription
+                                }
                             }
                         }
+                    } label: {
+                        Text("Upload Document")
+                            .frame(maxWidth: .infinity)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 14)
+                            .foregroundStyle(.white)
+                            .background(Color.primaryPurple)
+                            .cornerRadius(8)
+                            .fontWeight(.semibold)
                     }
-                } label: {
-                    Text("Upload Document")
-                        .frame(maxWidth: .infinity)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 14)
-                        .foregroundStyle(.white)
-                        .background(Color.primaryPurple)
-                        .cornerRadius(8)
-                        .fontWeight(.semibold)
+                    .padding(15)
                 }
-                .padding(15)
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {

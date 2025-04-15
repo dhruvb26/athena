@@ -11,6 +11,7 @@ import Foundation
 import GoogleSignIn
 import Logging
 
+@MainActor
 class AuthViewModel: ObservableObject {
     private let logger = Logger(label: "athena.AuthViewModel")
 

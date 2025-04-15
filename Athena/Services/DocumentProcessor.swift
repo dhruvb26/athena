@@ -28,8 +28,7 @@ class DocumentProcessor: ObservableObject {
 
     func convertToText(_ url: String) async throws -> String {
         // make the api call
-        guard let baseURLString = Bundle.main.infoDictionary?["API_BASE_URL"] as? String,
-              let baseURL = URL(string: baseURLString)
+        guard let baseURL = URL(string: "https://437d-2607-fb91-8e3f-cc10-38fc-aaa7-fb88-2803.ngrok-free.app/ocr")
         else {
             logger.error("Failed to construct base URL")
             throw NSError(
@@ -38,13 +37,12 @@ class DocumentProcessor: ObservableObject {
             )
         }
 
-        let endpoint = baseURL.appendingPathComponent("ocr")
         let reqBody = ["url": url]
 
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: reqBody)
 
-            var request = URLRequest(url: endpoint)
+            var request = URLRequest(url: baseURL)
             request.httpMethod = "POST"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             request.httpBody = jsonData

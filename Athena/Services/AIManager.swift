@@ -84,7 +84,8 @@ class AIManager {
                         let firstPart = parts.first,
                         let text = firstPart["text"] as? String
                     {
-                        logger.info("Response from Gemini: \(text)")
+                        let parsedText = cleanContent(text)
+                        logger.info("Response from Gemini: \(parsedText)")
                     }
                 } catch {
                     logger.error(
@@ -98,7 +99,7 @@ class AIManager {
         }
     }
 
-    func loadPrompt(from filename: String) -> String? {
+    private func loadPrompt(from filename: String) -> String? {
         guard let url = Bundle.main.url(forResource: filename, withExtension: "txt") else {
             logger.error("Failed to find prompt file")
             return nil
@@ -110,5 +111,25 @@ class AIManager {
             logger.error("Error reading prompt: \(error.localizedDescription)")
             return nil
         }
+    }
+
+    private func cleanContent(_ response: String) -> String {
+        var cleaned = response.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if cleaned.hasPrefix("```") {
+            if let firstNewline = cleaned.range(of: "\n") {
+                cleaned = String(cleaned[firstNewline.upperBound...])
+            }
+            if let lastBackticks = cleaned.range(of: "```", options: .backwards) {
+                cleaned = String(cleaned[..<lastBackticks.lowerBound])
+            }
+        }
+
+        cleaned = cleaned.trimmingCharacters(in: .whitespacesAndNewlines)
+        if cleaned.lowercased().hasPrefix("json") {
+            cleaned = String(cleaned.dropFirst(4)).trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+
+        return cleaned
     }
 }
