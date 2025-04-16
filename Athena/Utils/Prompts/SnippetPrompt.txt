@@ -4,7 +4,6 @@ return exactly 5 unique notification snippets, each consisting of:
     **title**: A short, attention-grabbing headline (max 8 words).
     **body**: A concise summary or insight (1–2 sentences).
     **tags**: A list of relevant tags or keywords (e.g. ["ai", /"productivity"]).
-    **scheduled**: Bool that should always be false
 
 The tone should be informative yet friendly. Output your result strictly in valid json format like the example below:
 
@@ -12,13 +11,11 @@ The tone should be informative yet friendly. Output your result strictly in vali
   {
     "title": "AI Transforms Classroom Learning",
     "body": "Educators are adopting AI tools to personalize instruction and improve student engagement.",
-    "tags": ["education", "ai", "innovation"],
-    "scheduled": false
+    "tags": ["education", "ai", "innovation"]
   },
   {
     "title": "New Study Links Sleep to Focus",
     "body": "Recent research highlights how better sleep routines lead to improved attention spans in teens.",
-    "tags": ["health", "focus", "research"],
-    "scheduled": false
+    "tags": ["health", "focus", "research"]
   }
 ]

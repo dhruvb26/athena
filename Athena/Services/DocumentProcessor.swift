@@ -12,42 +12,23 @@ import Logging
 class DocumentProcessor: ObservableObject {
     private let aiManager = AIManager()
     private let logger = Logger(label: "athena.DocumentProcessor")
+    private let quizItemManager = QuizItemManager()
     private let db = Firestore.firestore()
 
     func processDocument(_ url: String, _ course: Course) async {
-        let courseID = course.docID
-        let notificationType = course.notificationType
-
         do {
             let extractedText = try await convertToText(url)
             let geminiResponse = try await aiManager.makeGeminiCall(
-                extractedText, notificationType
+                extractedText, course.notificationType
             )
-            logger.info("Processed document result: \(geminiResponse)")
 
-            // If geminiResponse is a String (JSON), decode it
-            let quizItems: [[String: Any]]
-            if let responseString = geminiResponse as? String,
-               let data = responseString.data(using: .utf8),
-               let decoded = try JSONSerialization.jsonObject(with: data) as? [[String: Any]]
-            {
-                quizItems = decoded
-            } else if let responseArray = geminiResponse as? [[String: Any]] {
-                quizItems = responseArray
-            } else {
-                logger.error("Gemini response was not in expected format")
-                return
-            }
+            let quizItems = parseAndCleanQuizItems(from: geminiResponse, for: course)
 
-            for var item in quizItems {
-                item["courseID"] = courseID
+            for item in quizItems {
                 do {
-                    try await db.collection("quizItems").addDocument(data: item)
-                    // logger.info("Successfully saved quiz item to Firestore")
+                    try await quizItemManager.saveQuizItemToDB(item)
                 } catch {
-                    logger.error(
-                        "Failed to save quiz item to Firestore: \(error.localizedDescription)"
-                    )
+                    logger.error("Failed to save: \(error)")
                 }
             }
         } catch {
@@ -55,7 +36,45 @@ class DocumentProcessor: ObservableObject {
         }
     }
 
-    func convertToText(_ url: String) async throws -> String {
+    private func parseAndCleanQuizItems(from geminiResponse: String, for course: Course) -> [QuizItem] {
+        guard let data = geminiResponse.data(using: .utf8) else {
+            logger.error("Failed to convert geminiResponse to Data.")
+            return []
+        }
+
+        guard let jsonArray = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] else {
+            logger.error("Failed to parse JSON array from data.")
+            return []
+        }
+
+        let quizItems: [QuizItem] = jsonArray.compactMap { dict in
+            var mutableDict = dict
+
+            if course.notificationType == .question {
+                mutableDict["answered"] = false
+            }
+            mutableDict["scheduled"] = false
+            mutableDict["type"] = course.notificationType.rawValue
+            mutableDict["courseId"] = course.docID
+            mutableDict["docID"] = UUID().uuidString
+
+            guard let jsonData = try? JSONSerialization.data(withJSONObject: mutableDict) else {
+                return nil
+            }
+
+            let decoder = JSONDecoder()
+            do {
+                let quizItem = try decoder.decode(QuizItem.self, from: jsonData)
+                return quizItem
+            } catch {
+                return nil
+            }
+        }
+
+        return quizItems
+    }
+
+    private func convertToText(_ url: String) async throws -> String {
         // make the api call
         guard
             let baseURL = URL(

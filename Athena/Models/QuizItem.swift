@@ -11,10 +11,11 @@ import Foundation
 enum QuizItemType: String, Codable {
     case question
     case snippet
+    case mixed
 }
 
 struct QuizItem: Identifiable, Codable {
-    @DocumentID var docID: String?
+    var docID: String?
     var title: String
     var body: String
     var type: QuizItemType

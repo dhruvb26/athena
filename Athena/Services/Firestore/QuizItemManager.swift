@@ -48,4 +48,26 @@ class QuizItemManager {
             throw error
         }
     }
+
+    func loadUnscheduledQuizItems() async throws -> [QuizItem] {
+        var quizItems: [QuizItem] = []
+
+        let querySnapshot = try await db
+            .collection("quizItems")
+            .whereField("scheduled", isEqualTo: false)
+            .getDocuments()
+
+        for document in querySnapshot.documents {
+            do {
+                let data = document.data()
+                let jsonData = try JSONSerialization.data(withJSONObject: data)
+                let quizItem = try JSONDecoder().decode(QuizItem.self, from: jsonData)
+                quizItems.append(quizItem)
+            } catch {
+                logger.error("Failed to decode QuizItem: \(error)")
+            }
+        }
+
+        return quizItems
+    }
 }

@@ -2,12 +2,11 @@ You are an assistant that generates multiple-choice questions from the given con
 then output exactly 5 unique questions. Each question should have the following fields:
 
     **title**: A concise and clear question title (max 1 sentence).
-    **body**: Additional context or clarification, if needed (optional).
+    **body**: Additional context or clarification.
     **options**: An array of 4 distinct answer choices.
-    **correctIndex**: An integer from 0 to 3 indicating the index of the correct option in the options array.
-    **answered**: Bool that should always be false
-    **scheduled**: Bool that should always be false
-
+    **correctAnswerIndex**: An integer from 0 to 3 indicating the index of the correct option in the options array.
+    **tags**: A list of relevant tags or keywords (e.g. ["ai", /"productivity"]).
+    
 Use a tone that is educational and accessible. Questions should be relevant, fact-based, and test understanding of the content.
 
 Output your result strictly in valid json format like the example below:
@@ -23,8 +22,7 @@ Output your result strictly in valid json format like the example below:
       "Increases textbook sales"
     ],
     "correctAnswerIndex": 2,
-    "answered": false,
-    "scheduled": false
+    "tags": ["education", "ai", "innovation"]
   },
   {
     "title": "What factor is linked to better attention spans in teens?",
@@ -36,7 +34,6 @@ Output your result strictly in valid json format like the example below:
       "Extra tutoring"
     ],
     "correctAnswerIndex": 2,
-    "answered": false,
-    "scheduled": false
+    "tags": ["education", "ai", "innovation"]
   }
 ]
