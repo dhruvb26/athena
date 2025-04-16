@@ -20,34 +20,35 @@ class DocumentProcessor: ObservableObject {
 
         do {
             let extractedText = try await convertToText(url)
-            do {
-                let geminiResponse = try await aiManager.makeGeminiCall(
-                    extractedText, notificationType
-                )
-                logger.info("Processed document result: \(geminiResponse)")
+            let geminiResponse = try await aiManager.makeGeminiCall(
+                extractedText, notificationType
+            )
+            logger.info("Processed document result: \(geminiResponse)")
 
+            // If geminiResponse is a String (JSON), decode it
+            let quizItems: [[String: Any]]
+            if let responseString = geminiResponse as? String,
+               let data = responseString.data(using: .utf8),
+               let decoded = try JSONSerialization.jsonObject(with: data) as? [[String: Any]]
+            {
+                quizItems = decoded
+            } else if let responseArray = geminiResponse as? [[String: Any]] {
+                quizItems = responseArray
+            } else {
+                logger.error("Gemini response was not in expected format")
+                return
+            }
+
+            for var item in quizItems {
+                item["courseID"] = courseID
                 do {
-                    if let quizItems = geminiResponse as? [[String: Any]] {
-                        for var item in quizItems {
-                            item["courseID"] = courseID
-                            do {
-                                try await db.collection("quizItems").addDocument(data: item)
-                                logger.info("Successfully saved quiz item to Firestore")
-                            } catch {
-                                logger.error(
-                                    "Failed to save quiz item to Firestore: \(error.localizedDescription)"
-                                )
-                            }
-                        }
-                    } else {
-                        logger.error("Gemini response was not in expected format")
-                    }
+                    try await db.collection("quizItems").addDocument(data: item)
+                    // logger.info("Successfully saved quiz item to Firestore")
                 } catch {
-                    logger.error("Failed to parse Gemini response: \(error.localizedDescription)")
+                    logger.error(
+                        "Failed to save quiz item to Firestore: \(error.localizedDescription)"
+                    )
                 }
-
-            } catch {
-                logger.error("Failed to process with Gemini: \(error.localizedDescription)")
             }
         } catch {
             logger.error("Failed to process document: \(error.localizedDescription)")

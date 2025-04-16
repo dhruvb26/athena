@@ -6,6 +6,7 @@ then output exactly 5 unique questions. Each question should have the following 
     **options**: An array of 4 distinct answer choices.
     **correctIndex**: An integer from 0 to 3 indicating the index of the correct option in the options array.
     **answered**: Bool that should always be false
+    **scheduled**: Bool that should always be false
 
 Use a tone that is educational and accessible. Questions should be relevant, fact-based, and test understanding of the content.
 
@@ -22,7 +23,8 @@ Output your result strictly in valid json format like the example below:
       "Increases textbook sales"
     ],
     "correctAnswerIndex": 2,
-    "answered": false
+    "answered": false,
+    "scheduled": false
   },
   {
     "title": "What factor is linked to better attention spans in teens?",
@@ -34,6 +36,7 @@ Output your result strictly in valid json format like the example below:
       "Extra tutoring"
     ],
     "correctAnswerIndex": 2,
-    "answered": false
+    "answered": false,
+    "scheduled": false
   }
 ]

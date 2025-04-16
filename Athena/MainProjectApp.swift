@@ -31,11 +31,13 @@ class AppDelegate: NSObject, UIApplicationDelegate {
             return handler
         }
 
+        let logger = Logger(label: "athena")
+
         NotificationManager.shared.requestPermission { success, error in
             if success {
-                print("Notification permission granted.")
+                logger.info("Notification permission granted.")
             } else if let error {
-                print("Error requesting notification permission: \(error.localizedDescription)")
+                logger.error("Error requesting notification permission: \(error.localizedDescription)")
             }
         }
         return true

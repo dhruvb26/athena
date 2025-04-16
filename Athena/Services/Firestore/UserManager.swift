@@ -23,7 +23,7 @@ class UserManager {
             if let error {
                 self.logger.error("Failed to save user: \(error.localizedDescription)")
             } else {
-                self.logger.info("User saved to Firestore")
+//                self.//logger.info("User saved to Firestore")
             }
         }
     }

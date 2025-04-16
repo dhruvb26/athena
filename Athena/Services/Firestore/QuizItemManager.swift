@@ -18,7 +18,7 @@ class QuizItemManager {
     func saveQuizItemToDB(_ quizItem: QuizItem) async throws {
         do {
             try await db.collection("quizItems").document(quizItem.id).setData(quizItem.firestoreRepresentation())
-            logger.info("Quiz item saved to Firestore.")
+            // logger.info("Quiz item saved to Firestore.")
         } catch {
             logger.error("Failed to save quiz item: \(error.localizedDescription)")
             throw error
@@ -30,7 +30,7 @@ class QuizItemManager {
 
         do {
             try await quizItemRef.updateData(fields)
-            logger.info("Quiz item updated successfully")
+            // logger.info("Quiz item updated successfully")
         } catch {
             logger.error("Failed to update quiz item: \(error.localizedDescription)")
             throw error
@@ -42,7 +42,7 @@ class QuizItemManager {
             try await db.collection("quizItems").document(documentId).updateData([
                 "scheduled": true,
             ])
-            logger.info("Marked quiz item as scheduled")
+            // logger.info("Marked quiz item as scheduled")
         } catch {
             logger.error("Error updating scheduled status: \(error.localizedDescription)")
             throw error

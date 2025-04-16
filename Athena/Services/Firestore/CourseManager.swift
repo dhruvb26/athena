@@ -33,7 +33,7 @@ class CourseManager: ObservableObject {
             let docSnapshot = try await docRef.getDocument()
             if let savedCourse = try? docSnapshot.data(as: Course.self) {
                 userCourses.append(savedCourse)
-                logger.info("Course saved to Firestore successfully")
+                // logger.info("Course saved to Firestore successfully")
             } else {
                 logger.error("Failed to decode saved course data")
             }
@@ -62,7 +62,7 @@ class CourseManager: ObservableObject {
                 logger.error("Failed to delete course: \(error.localizedDescription)")
             } else {
                 userCourses.removeAll { $0.id == course.id }
-                logger.info("Course deleted successfully")
+                // logger.info("Course deleted successfully")
             }
         }
     }
@@ -83,7 +83,7 @@ class CourseManager: ObservableObject {
                 }
             }
 
-            logger.info("Course updated successfully")
+            // logger.info("Course updated successfully")
         } catch {
             logger.error("Failed to update course: \(error.localizedDescription)")
         }
@@ -144,7 +144,7 @@ class CourseManager: ObservableObject {
             _ = try await docRef.putDataAsync(fileData)
             let downloadURL = try await docRef.downloadURL().absoluteString
 
-            logger.info("Document uploaded successfully")
+            // logger.info("Document uploaded successfully")
             let newDocument = Document(title: title, url: downloadURL)
 
             // Add document processing here
@@ -158,7 +158,7 @@ class CourseManager: ObservableObject {
             {
                 existingDocuments.append(newDocument.firestoreRepresentation())
                 await updateCourseInDB(courseID, ["documents": existingDocuments])
-                logger.info("Course documents updated successfully")
+                // logger.info("Course documents updated successfully")
             } else {
                 logger.error("Failed to process course documents")
                 throw NSError(
@@ -211,9 +211,9 @@ class CourseManager: ObservableObject {
             if let fileURL = document.url {
                 let ref = storage.reference(forURL: fileURL)
                 try await ref.delete()
-                logger.info("Document deleted successfully")
+                // logger.info("Document deleted successfully")
             } else {
-                logger.info("Document reference updated successfully")
+                // logger.info("Document reference updated successfully")
             }
         } catch {
             logger.error("Error in document deletion process: \(error.localizedDescription)")
@@ -230,7 +230,7 @@ class CourseManager: ObservableObject {
 
             guard let courseId = course.docID else {
                 courseDocuments = course.documents
-                logger.info("Using local course documents (no course ID)")
+                // logger.info("Using local course documents (no course ID)")
                 return
             }
 
@@ -240,10 +240,10 @@ class CourseManager: ObservableObject {
                let updatedCourse = try? docSnapshot.data(as: Course.self)
             {
                 courseDocuments = updatedCourse.documents
-                logger.info("Documents loaded successfully from Firestore")
+                // logger.info("Documents loaded successfully from Firestore")
             } else {
                 courseDocuments = course.documents
-                logger.info("Using local course documents (no Firestore data)")
+                // logger.info("Using local course documents (no Firestore data)")
             }
         } catch {
             logger.error("Error loading documents: \(error.localizedDescription)")
