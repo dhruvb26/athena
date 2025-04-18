@@ -37,7 +37,7 @@ class QuizItemManager {
         }
     }
 
-    func markQuizItemAsScheduled(documentId: String) async throws {
+    func markQuizItemAsScheduled(_ documentId: String) async throws {
         do {
             try await db.collection("quizItems").document(documentId).updateData([
                 "scheduled": true,
@@ -49,12 +49,28 @@ class QuizItemManager {
         }
     }
 
-    func loadUnscheduledQuizItems() async throws -> [QuizItem] {
+    func recordAnswerIndex(_ documentId: String, _ index: Int) async throws {
+        do {
+            try await db.collection("quizItems").document(documentId).updateData([
+                "recordedAnswerIndex": index,
+            ])
+            // logger.info("Recorded answer index successfully")
+        } catch {
+            logger.error("Error recording answer index: \(error.localizedDescription)")
+            throw error
+        }
+    }
+
+    func loadUnscheduledQuizItems(_ userId: String) async throws -> [QuizItem] {
         var quizItems: [QuizItem] = []
+
+        let courseManager = CourseManager()
+        let courseIds = await courseManager.loadCoursesForUser(userId)
 
         let querySnapshot = try await db
             .collection("quizItems")
             .whereField("scheduled", isEqualTo: false)
+            .whereField("courseId", in: courseIds)
             .getDocuments()
 
         for document in querySnapshot.documents {

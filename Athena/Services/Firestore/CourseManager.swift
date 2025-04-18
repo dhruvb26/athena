@@ -116,6 +116,31 @@ class CourseManager: ObservableObject {
         }
     }
 
+    func loadCoursesForUser(_ userId: String) async -> [String] {
+        isLoading = true
+        var courseIds: [String] = []
+
+        do {
+            let snapshot = try await db.collection("courses")
+                .whereField("userId", isEqualTo: userId)
+                .getDocuments()
+
+            userCourses = try snapshot.documents.compactMap {
+                let course = try $0.data(as: Course.self)
+                courseIds.append(course.id)
+                return course
+            }
+
+            isLoading = false
+
+        } catch {
+            logger.error("Error fetching courses for user: \(error.localizedDescription)")
+            isLoading = false
+        }
+
+        return courseIds
+    }
+
     @MainActor
     func uploadDocumentToStorage(_ title: String, _ url: URL, _ course: Course) async throws {
         isLoading = true

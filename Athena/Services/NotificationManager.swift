@@ -73,7 +73,7 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         )
     }
 
-    func scheduleBasicNotification(
+    private func scheduleBasicNotification(
         title: String,
         body: String,
         userInfo: [AnyHashable: Any] = [:],
@@ -91,16 +91,6 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     func scheduleBasicNotification(
         title: String,
         body: String,
-        timeInterval: TimeInterval,
-        repeats: Bool = false
-    ) {
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: timeInterval, repeats: repeats)
-        scheduleBasicNotification(title: title, body: body, trigger: trigger)
-    }
-
-    func scheduleBasicNotification(
-        title: String,
-        body: String,
         userInfo: [AnyHashable: Any] = [:],
         date: Date,
         repeats: Bool = false
@@ -109,7 +99,7 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         scheduleBasicNotification(title: title, body: body, userInfo: userInfo, trigger: trigger)
     }
 
-    func scheduleInteractiveNotification(
+    private func scheduleInteractiveNotification(
         title: String,
         body: String,
         categoryIdentifier: String,
@@ -129,24 +119,6 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         content.userInfo = userInfo
 
         scheduleNotification(content: content, trigger: trigger)
-    }
-
-    func scheduleInteractiveNotification(
-        title: String,
-        body: String,
-        categoryIdentifier: String,
-        userInfo: [AnyHashable: Any] = [:],
-        timeInterval: TimeInterval,
-        repeats: Bool = false
-    ) {
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: timeInterval, repeats: repeats)
-        scheduleInteractiveNotification(
-            title: title,
-            body: body,
-            categoryIdentifier: categoryIdentifier,
-            userInfo: userInfo,
-            trigger: trigger
-        )
     }
 
     func scheduleInteractiveNotification(
