@@ -5,6 +5,7 @@
 //  Created by Dhruv Bansal on 4/4/25.
 //
 
+import Logging
 import SwiftUI
 import UserNotifications
 
@@ -27,6 +28,7 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
 
     private var categories: [String: NotificationCategory] = [:]
     private var actionHandlers: [String: NotificationActionHandler] = [:]
+    private let logger = Logger(label: "athena.NotificationManager")
 
     override private init() {
         super.init()
@@ -107,7 +109,7 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         trigger: UNNotificationTrigger
     ) {
         guard categories[categoryIdentifier] != nil else {
-            print("Error: Category \(categoryIdentifier) not registered")
+            logger.error("Error: Category \(categoryIdentifier) not registered")
             return
         }
 
@@ -155,9 +157,9 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
 
         UNUserNotificationCenter.current().add(request) { error in
             if let error {
-                print("Failed to schedule notification: \(error.localizedDescription)")
+                self.logger.error("Failed to schedule notification: \(error.localizedDescription)")
             } else {
-                print("Notification scheduled successfully.")
+                self.logger.info("Notification scheduled successfully.")
             }
         }
     }

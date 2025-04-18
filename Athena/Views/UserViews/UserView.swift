@@ -10,6 +10,7 @@ import SwiftUI
 
 struct UserView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
+    @StateObject private var quizViewModel = QuizViewModel()
 
     var body: some View {
         ZStack {
@@ -26,6 +27,21 @@ struct UserView: View {
                                 .font(.subheadline)
                                 .foregroundStyle(.gray)
                         }
+
+                        Button {
+                            Task {
+                                try await quizViewModel.scheduleQuizItemsFromDb()
+                            }
+                        } label: {
+                            HStack {
+                                Image(systemName: "bell.fill")
+                                Text("Schedule Quiz Items")
+                            }
+                            .foregroundStyle(Color.secondaryPurple)
+                            .frame(maxWidth: .infinity)
+                        }
+                        .padding()
+
                         Spacer()
 
                         Button {

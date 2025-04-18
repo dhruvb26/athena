@@ -9,7 +9,7 @@ import FirebaseAuth
 import Foundation
 import Logging
 
-class QuizViewModel {
+class QuizViewModel: ObservableObject {
     private let notificationManager = NotificationManager.shared
     private let quizItemManager = QuizItemManager()
     private let userId = Auth.auth().currentUser?.uid
@@ -47,7 +47,7 @@ class QuizViewModel {
                                 handler: { [weak self] _ in
                                     if let optionIndex = options.firstIndex(of: opt) {
                                         Task {
-                                            try? await self?.quizItemManager.recordAnswerIndex(quizItem.id, optionIndex)
+                                            try? await self?.quizItemManager.recordAnswerIndex(quizItem.docID ?? "", optionIndex)
                                         }
                                     }
                                 }
@@ -72,8 +72,7 @@ class QuizViewModel {
                         )
                     }
                 }
-
-                try await quizItemManager.markQuizItemAsScheduled(quizItem.id)
+                try await quizItemManager.markQuizItemAsScheduled(quizItem.docID ?? "")
             } catch {
                 logger.error("Failed to schedule quiz item \(quizItem.id): \(error.localizedDescription)")
                 continue

@@ -10,14 +10,15 @@ import FirebaseFirestore
 import Foundation
 import Logging
 
-class QuizItemManager {
+class QuizItemManager: ObservableObject {
     private let db = Firestore.firestore()
     private let userId = Auth.auth().currentUser?.uid
     private let logger = Logger(label: "athena.QuizItemManager")
 
     func saveQuizItemToDB(_ quizItem: QuizItem) async throws {
         do {
-            try await db.collection("quizItems").document(quizItem.id).setData(quizItem.firestoreRepresentation())
+            try await db.collection("quizItems").document(quizItem.id).setData(
+                quizItem.firestoreRepresentation())
             // logger.info("Quiz item saved to Firestore.")
         } catch {
             logger.error("Failed to save quiz item: \(error.localizedDescription)")
@@ -53,6 +54,7 @@ class QuizItemManager {
         do {
             try await db.collection("quizItems").document(documentId).updateData([
                 "recordedAnswerIndex": index,
+                "answered": true,
             ])
             // logger.info("Recorded answer index successfully")
         } catch {
@@ -67,15 +69,17 @@ class QuizItemManager {
         let courseManager = CourseManager()
         let courseIds = await courseManager.loadCoursesForUser(userId)
 
-        let querySnapshot = try await db
-            .collection("quizItems")
-            .whereField("scheduled", isEqualTo: false)
-            .whereField("courseId", in: courseIds)
-            .getDocuments()
+        let querySnapshot =
+            try await db
+                .collection("quizItems")
+                .whereField("scheduled", isEqualTo: false)
+                .whereField("courseId", in: courseIds)
+                .getDocuments()
 
         for document in querySnapshot.documents {
             do {
-                let data = document.data()
+                var data = document.data()
+                data["docID"] = document.documentID
                 let jsonData = try JSONSerialization.data(withJSONObject: data)
                 let quizItem = try JSONDecoder().decode(QuizItem.self, from: jsonData)
                 quizItems.append(quizItem)
@@ -83,7 +87,6 @@ class QuizItemManager {
                 logger.error("Failed to decode QuizItem: \(error)")
             }
         }
-
         return quizItems
     }
 }
