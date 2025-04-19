@@ -75,10 +75,10 @@ class DocumentProcessor: ObservableObject {
     }
 
     private func convertToText(_ url: String) async throws -> String {
-        // make the api call
+        // make the api call -> custom endpoint
         guard
             let baseURL = URL(
-                string: "https://437d-2607-fb91-8e3f-cc10-38fc-aaa7-fb88-2803.ngrok-free.app/ocr")
+                string: "https://athena-api-eight.vercel.app/ocr")
         else {
             logger.error("Failed to construct base URL")
             throw NSError(

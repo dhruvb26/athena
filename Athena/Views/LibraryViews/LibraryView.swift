@@ -58,7 +58,7 @@ struct LibraryView: View {
     }
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: .bottomTrailing) {
             VStack(spacing: 0) {
                 searchBarView
 
@@ -84,9 +84,17 @@ struct LibraryView: View {
                 .padding(.horizontal)
 
                 courseListView
-
-                showMapButton
             }
+
+            Button {
+                showingMapView = true
+            } label: {
+                Image(systemName: "map.circle.fill")
+                    .font(.system(size: 35))
+            }
+            .foregroundStyle(Color.secondaryPurple)
+            .padding(.trailing, 45)
+            .padding(.bottom, 20)
         }
         .tint(Color.secondaryPurple)
         .sheet(isPresented: $showingAddCourse) {
@@ -208,23 +216,6 @@ struct LibraryView: View {
                 print("Save Offline tapped for \(course.name)")
             }
             Button("Cancel", role: .cancel) {}
-        }
-    }
-
-    private var showMapButton: some View {
-        HStack {
-            Spacer()
-            Button {
-                showingMapView = true
-            } label: {
-                Image(systemName: "map.circle.fill")
-                    .font(.system(size: 35))
-                    .padding(.horizontal, 16)
-            }
-            .foregroundStyle(Color.secondaryPurple)
-            .clipShape(Circle())
-            .padding(.trailing, 20)
-            .padding(.bottom, 20)
         }
     }
 }

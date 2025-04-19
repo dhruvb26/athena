@@ -13,58 +13,52 @@ struct UserView: View {
     @StateObject private var quizViewModel = QuizViewModel()
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: .bottomTrailing) {
             VStack {
                 if let user = authViewModel.user {
-                    VStack {
-                        HStack {
-                            Text("Email")
-                                .font(.headline)
-
-                            Spacer()
-
-                            Text(user.email ?? "No email available")
-                                .font(.subheadline)
-                                .foregroundStyle(.gray)
-                        }
-
-                        Button {
-                            Task {
-                                try await quizViewModel.scheduleQuizItemsFromDb()
-                            }
-                        } label: {
-                            HStack {
-                                Image(systemName: "bell.fill")
-                                Text("Schedule Quiz Items")
-                            }
-                            .foregroundStyle(Color.secondaryPurple)
-                            .frame(maxWidth: .infinity)
-                        }
-                        .padding()
+                    HStack {
+                        Text("Email")
+                            .font(.headline)
 
                         Spacer()
 
-                        Button {
-                            authViewModel.signOut()
-                        } label: {
-                            HStack {
-                                Image(systemName: "arrow.right.circle.fill")
-                                Text("Sign Out")
-                            }
-                            .foregroundStyle(Color.secondaryPurple)
-                            .frame(maxWidth: .infinity)
-                        }
-                        .padding()
+                        Text(user.email ?? "No email available")
+                            .font(.subheadline)
+                            .foregroundStyle(.gray)
                     }
+
+                    Button {
+                        Task {
+                            try await quizViewModel.scheduleQuizItemsFromDb()
+                        }
+                    } label: {
+                        HStack {
+                            Image(systemName: "bell.fill")
+                            Text("Schedule Quiz Items")
+                        }
+                        .foregroundStyle(Color.secondaryPurple)
+                        .frame(maxWidth: .infinity)
+                    }
+                    .padding()
                 } else {
                     Text("Not logged in")
                         .font(.subheadline)
                         .foregroundStyle(.gray)
                 }
+
                 Spacer()
             }
             .padding()
-            .padding(.horizontal, 8)
+
+            Button {
+                authViewModel.signOut()
+            } label: {
+                Image(systemName: "arrow.right.circle.fill")
+                    .font(.system(size: 35))
+            }
+            .foregroundStyle(Color.secondaryPurple)
+            .padding(.trailing, 45)
+            .padding(.bottom, 20)
         }
     }
 }

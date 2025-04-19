@@ -159,7 +159,7 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
             if let error {
                 self.logger.error("Failed to schedule notification: \(error.localizedDescription)")
             } else {
-                self.logger.info("Notification scheduled successfully.")
+//                self.logger.info("Notification scheduled successfully.")
             }
         }
     }
