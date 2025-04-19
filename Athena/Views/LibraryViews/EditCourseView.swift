@@ -31,33 +31,35 @@ struct EditCourseView: View {
     }
 
     var body: some View {
-        ZStack {
-            VStack(spacing: 10) {
-                Form {
-                    Section {
-                        TextField("Course Name", text: $name)
-                        TextField("Course Code", text: $code)
-                        TextField("Semester", text: $semester)
-                    }
+        NavigationStack {
+            ZStack {
+                Color(.systemGroupedBackground)
+                    .ignoresSafeArea()
+                VStack(spacing: 10) {
+                    Form {
+                        Section {
+                            TextField("Course Name", text: $name)
+                            TextField("Course Code", text: $code)
+                            TextField("Semester", text: $semester)
+                        }
 
-                    Section {
-                        Picker("Notification Type", selection: $notificationType) {
-                            Text("Question").tag(NotificationType.question)
-                            Text("Snippet").tag(NotificationType.snippet)
-                            Text("Mixed").tag(NotificationType.mixed)
+                        Section {
+                            Picker("Notification Type", selection: $notificationType) {
+                                Text("Question").tag(NotificationType.question)
+                                Text("Snippet").tag(NotificationType.snippet)
+                                Text("Mixed").tag(NotificationType.mixed)
+                            }
+                        }
+
+                        Section {
+                            Picker("Difficulty", selection: $difficulty) {
+                                Text("Easy").tag(Difficulty.easy)
+                                Text("Medium").tag(Difficulty.medium)
+                                Text("Hard").tag(Difficulty.hard)
+                            }
                         }
                     }
 
-                    Section {
-                        Picker("Difficulty", selection: $difficulty) {
-                            Text("Easy").tag(Difficulty.easy)
-                            Text("Medium").tag(Difficulty.medium)
-                            Text("Hard").tag(Difficulty.hard)
-                        }
-                    }
-                }
-
-                VStack(spacing: 12) {
                     Button {
                         isUploadingOverlayVisible = true
 
@@ -85,24 +87,25 @@ struct EditCourseView: View {
                             .fontWeight(.semibold)
                     }
                     .padding(.horizontal)
+                    .padding(.bottom)
                 }
-                .padding(.bottom)
-            }
-
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
+                .tint(Color.secondaryPurple)
+                .navigationTitle("Edit Course")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") {
+                            dismiss()
+                        }
                     }
                 }
-            }
-            .tint(Color.secondaryPurple)
 
-            if isUploadingOverlayVisible {
-                ZStack {
-                    Color.black.opacity(0.4)
-                        .ignoresSafeArea()
-                    ProgressView()
+                if isUploadingOverlayVisible {
+                    ZStack {
+                        Color.black.opacity(0.4)
+                            .ignoresSafeArea()
+                        ProgressView()
+                    }
                 }
             }
         }

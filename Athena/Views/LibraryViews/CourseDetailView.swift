@@ -162,13 +162,13 @@ struct CourseDetailView: View {
                     .padding(15)
                 }
             }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        isShowingDocumentSheet = false
-                    }
-                }
-            }
+//            .toolbar {
+//                ToolbarItem(placement: .navigationBarLeading) {
+//                    Button("Cancel") {
+//                        isShowingDocumentSheet = false
+//                    }
+//                }
+//            }
         }
         .fileImporter(
             isPresented: $showingFilePicker,

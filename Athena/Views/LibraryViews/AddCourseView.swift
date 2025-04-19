@@ -22,9 +22,12 @@ struct AddCourseView: View {
     @State private var isUploadingOverlayVisible = false
 
     var body: some View {
-        ZStack {
-            NavigationView {
-                VStack {
+        NavigationStack {
+            ZStack {
+                Color(.systemGroupedBackground)
+                    .ignoresSafeArea()
+
+                VStack(spacing: 0) {
                     Form {
                         Section {
                             TextField("Course Name", text: $name)
@@ -48,8 +51,6 @@ struct AddCourseView: View {
                             }
                         }
                     }
-                    .navigationTitle("New Course")
-                    .navigationBarTitleDisplayMode(.inline)
 
                     Button {
                         isUploadingOverlayVisible = true
@@ -71,7 +72,7 @@ struct AddCourseView: View {
                         }
 
                     } label: {
-                        Text("Confirm")
+                        Text("Save")
                             .frame(maxWidth: .infinity)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 14)
@@ -80,16 +81,26 @@ struct AddCourseView: View {
                             .cornerRadius(8)
                             .fontWeight(.semibold)
                     }
-                    .padding(15)
+                    .padding(.horizontal)
+                    .padding(.bottom)
                 }
                 .tint(Color.secondaryPurple)
-            }
+                .navigationTitle("New Course")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") {
+                            dismiss()
+                        }
+                    }
+                }
 
-            if isUploadingOverlayVisible {
-                ZStack {
-                    Color.black.opacity(0.4)
-                        .ignoresSafeArea()
-                    ProgressView()
+                if isUploadingOverlayVisible {
+                    ZStack {
+                        Color.black.opacity(0.4)
+                            .ignoresSafeArea()
+                        ProgressView()
+                    }
                 }
             }
         }
