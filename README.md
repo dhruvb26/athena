@@ -21,5 +21,9 @@ swiftformat . --swiftversion 6
 - [x] Use async/await instead of completion handlers
 - [x] Remove unnecessary completion handlers
 - [x] Add quiz item fetching and notification scheduling logic
+- [ ] Support mixed notification type
+- [ ] Send notifications after recording answers
+- [ ] Allow users to change time intervals for the notifications
 - [ ] Use FirebaseMessaging for push notifications
+- [ ] Implement OpenAIViewModel as MCP Client 
 - [ ] Create flows for every major action
