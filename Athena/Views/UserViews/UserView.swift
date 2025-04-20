@@ -2,7 +2,7 @@
 //  UserView.swift
 //  Athena
 //
-//  Created by Dhruv Bansal on 4/1/25.
+//  Created by Kanav Gupta on 4/1/25.
 //
 
 import FirebaseAuth

@@ -2,7 +2,7 @@
 //  QuizItemManager.swift
 //  Athena
 //
-//  Created by Dhruv Bansal on 4/12/25.
+//  Created by Kanav Gupta on 4/12/25.
 //
 
 import FirebaseAuth
