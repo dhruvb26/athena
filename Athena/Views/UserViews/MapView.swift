@@ -11,20 +11,27 @@ import SwiftUI
 struct MapView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel = MapViewModel()
-
+    
     var body: some View {
-        Map(position: $viewModel.cameraPosition) {
-            ForEach(viewModel.studyLocations) { location in
-                Marker(location.name, coordinate: location.coordinate)
-                    .tint(.red)
+        VStack {
+            
+            // Map with markers
+            Map(position: $viewModel.cameraPosition) {
+                ForEach(viewModel.studyLocations) { location in
+                    Marker(location.name, coordinate: location.coordinate)
+                        .tint(.red)
+                }
+            }
+            .ignoresSafeArea()
+            .searchable(text: $viewModel.searchText, prompt: "Search for a place")
+            .onChange(of: viewModel.searchText) { _, newValue in
+                if !newValue.isEmpty, newValue.count > 2 {
+                    viewModel.searchPlaces()
+                }
             }
         }
-        .ignoresSafeArea()
-        .searchable(text: $viewModel.searchText, prompt: "Search for a place")
-        .onChange(of: viewModel.searchText) { _, newValue in
-            if !newValue.isEmpty, newValue.count > 2 {
-                viewModel.searchPlaces()
-            }
+        .onAppear {
+            viewModel.fetchStudyLocations()
         }
         .navigationTitle("Find a Place")
         .navigationBarTitleDisplayMode(.inline)
@@ -37,6 +44,8 @@ struct MapView: View {
         }
     }
 }
+
+
 
 #Preview {
     MapView()
