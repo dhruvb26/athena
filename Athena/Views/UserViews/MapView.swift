@@ -11,14 +11,13 @@ import SwiftUI
 struct MapView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel = MapViewModel()
-    
+
     var body: some View {
         VStack {
-            
             // Map with markers
             Map(position: $viewModel.cameraPosition) {
                 ForEach(viewModel.studyLocations) { location in
-                    Marker(location.name, coordinate: location.coordinate)
+                    Marker(location.name, coordinate: location.mapCoordinate)
                         .tint(.red)
                 }
             }
@@ -44,8 +43,6 @@ struct MapView: View {
         }
     }
 }
-
-
 
 #Preview {
     MapView()

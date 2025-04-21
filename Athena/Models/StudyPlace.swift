@@ -5,20 +5,23 @@
 //  Created by Dhruv Bansal on 3/31/25.
 //
 
+import CoreLocation
 import Foundation
 import MapKit
 
-import CoreLocation
-
 struct StudyPlace: Identifiable, Decodable {
-    let id = UUID()
+    let id: String
     let name: String
-    let latitude: Double
-    let longitude: Double
     let description: String
+    let coordinate: Coordinate
 
-    var coordinate: CLLocationCoordinate2D {
-        CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+    struct Coordinate: Decodable {
+        let latitude: Double
+        let longitude: Double
+    }
+
+    var mapCoordinate: CLLocationCoordinate2D {
+        CLLocationCoordinate2D(latitude: coordinate.latitude, longitude: coordinate.longitude)
     }
 }
 
