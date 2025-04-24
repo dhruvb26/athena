@@ -25,5 +25,5 @@ swiftformat . --swiftversion 6
 - [ ] Send notifications after recording answers
 - [ ] Allow users to change time intervals for the notifications
 - [ ] Use FirebaseMessaging for push notifications
-- [ ] Implement OpenAIViewModel as MCP Client 
+- [x] Implement MCPViewModel and MCP Client (uses local dependency)
 - [ ] Create flows for every major action
