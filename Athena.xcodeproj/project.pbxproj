@@ -7,7 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FC047B642DB98C8800915F48 /* MCP in Frameworks */ = {isa = PBXBuildFile; productRef = FC047B632DB98C8800915F48 /* MCP */; };
 		FC0DEBB22DAA675600A0AE81 /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = FC0DEBB12DAA675600A0AE81 /* Logging */; };
+		FC35C5562DB989A5003EC1B8 /* MCP in Frameworks */ = {isa = PBXBuildFile; productRef = FC35C5552DB989A5003EC1B8 /* MCP */; };
 		FCBAB2692D974EE9007FC275 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = FCBAB2682D974EE9007FC275 /* FirebaseAnalytics */; };
 		FCBAB26B2D974EE9007FC275 /* FirebaseAnalyticsOnDeviceConversion in Frameworks */ = {isa = PBXBuildFile; productRef = FCBAB26A2D974EE9007FC275 /* FirebaseAnalyticsOnDeviceConversion */; };
 		FCBAB26D2D974EE9007FC275 /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */ = {isa = PBXBuildFile; productRef = FCBAB26C2D974EE9007FC275 /* FirebaseAnalyticsWithoutAdIdSupport */; };
@@ -97,6 +99,7 @@
 				FCBAB2732D974EE9007FC275 /* FirebaseAuth in Frameworks */,
 				FCBAB2852D974EE9007FC275 /* FirebaseFunctionsCombine-Community in Frameworks */,
 				FCBAB2952D974EE9007FC275 /* FirebaseStorageCombine-Community in Frameworks */,
+				FC047B642DB98C8800915F48 /* MCP in Frameworks */,
 				FCBAB2712D974EE9007FC275 /* FirebaseAppDistribution-Beta in Frameworks */,
 				FCBAB2972D974EE9007FC275 /* FirebaseVertexAI in Frameworks */,
 				FCBAB2932D974EE9007FC275 /* FirebaseStorage in Frameworks */,
@@ -104,6 +107,7 @@
 				FCBAB2792D974EE9007FC275 /* FirebaseCrashlytics in Frameworks */,
 				FCBAB28D2D974EE9007FC275 /* FirebaseMessaging in Frameworks */,
 				FC0DEBB22DAA675600A0AE81 /* Logging in Frameworks */,
+				FC35C5562DB989A5003EC1B8 /* MCP in Frameworks */,
 				FCBAB28B2D974EE9007FC275 /* FirebaseMLModelDownloader in Frameworks */,
 				FCBAB28F2D974EE9007FC275 /* FirebasePerformance in Frameworks */,
 				FCBAB27B2D974EE9007FC275 /* FirebaseDatabase in Frameworks */,
@@ -197,6 +201,8 @@
 				FCBAB3362D9893F3007FC275 /* GoogleSignIn */,
 				FCBAB3382D9893F3007FC275 /* GoogleSignInSwift */,
 				FC0DEBB12DAA675600A0AE81 /* Logging */,
+				FC35C5552DB989A5003EC1B8 /* MCP */,
+				FC047B632DB98C8800915F48 /* MCP */,
 			);
 			productName = MainProject;
 			productReference = FC62213D2D9356C9005093BF /* Athena.app */;
@@ -278,6 +284,7 @@
 				FCBAB2672D974E76007FC275 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				FCBAB3352D9893F3007FC275 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				FC0DEBB02DAA675600A0AE81 /* XCRemoteSwiftPackageReference "swift-log" */,
+				FC047B622DB98C8800915F48 /* XCLocalSwiftPackageReference "../../../../hub/swift-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = FC62213E2D9356C9005093BF /* Products */;
@@ -498,7 +505,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = kanav.Athena;
+				PRODUCT_BUNDLE_IDENTIFIER = edu.Dhruv.Athena;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -528,7 +535,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = kanav.Athena;
+				PRODUCT_BUNDLE_IDENTIFIER = edu.Dhruv.Athena;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -649,6 +656,13 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		FC047B622DB98C8800915F48 /* XCLocalSwiftPackageReference "../../../../hub/swift-sdk" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = "../../../../hub/swift-sdk";
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCRemoteSwiftPackageReference section */
 		FC0DEBB02DAA675600A0AE81 /* XCRemoteSwiftPackageReference "swift-log" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -677,10 +691,18 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		FC047B632DB98C8800915F48 /* MCP */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MCP;
+		};
 		FC0DEBB12DAA675600A0AE81 /* Logging */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = FC0DEBB02DAA675600A0AE81 /* XCRemoteSwiftPackageReference "swift-log" */;
 			productName = Logging;
+		};
+		FC35C5552DB989A5003EC1B8 /* MCP */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MCP;
 		};
 		FCBAB2682D974EE9007FC275 /* FirebaseAnalytics */ = {
 			isa = XCSwiftPackageProductDependency;

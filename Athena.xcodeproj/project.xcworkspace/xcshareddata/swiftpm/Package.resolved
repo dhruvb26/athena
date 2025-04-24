@@ -1,5 +1,5 @@
 {
-  "originHash" : "cf353b0ba38133875716bfed0905c07d1c64f06499e02b557c0ff0b1d6d3f621",
+  "originHash" : "6815354667c650a1b41bfc633556532eedc10da367d199f3dcbc72fd657a628f",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -152,6 +152,15 @@
       "state" : {
         "revision" : "d72aed98f8253ec1aa9ea1141e28150f408cf17f",
         "version" : "1.29.0"
+      }
+    },
+    {
+      "identity" : "swift-system",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-system.git",
+      "state" : {
+        "revision" : "a34201439c74b53f0fd71ef11741af7e7caf01e1",
+        "version" : "1.4.2"
       }
     }
   ],
