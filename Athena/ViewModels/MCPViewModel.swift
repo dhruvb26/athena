@@ -32,7 +32,7 @@ struct MCPMessage: Identifiable {
 public class MCPViewModel: ObservableObject {
     private let client: Client = .init(name: "Athena", version: "1.0.0")
     private let logger = Logger(label: "athena.MCPViewModel")
-    private let serverURL = "https://750d-129-219-8-135.ngrok-free.app/mcp"
+    private let serverURL = "https://c6e3-2607-fb91-8e93-d56f-2575-7ff-b545-cee2.ngrok-free.app/mcp"
     private let apiKey = Bundle.main.infoDictionary?["ANTHROPIC_API_KEY"] as? String
 
     @Published var messages: [MCPMessage] = []
@@ -98,13 +98,14 @@ public class MCPViewModel: ObservableObject {
             var toolsArray: [[String: Any]] = []
 
             for tool in toolsResponse.tools {
-                let inputSchemaDict: [String: Any] = if let schema = tool.inputSchema {
-                    try JSONSerialization.jsonObject(
-                        with: JSONEncoder().encode(schema)
-                    ) as? [String: Any] ?? [:]
-                } else {
-                    [:]
-                }
+                let inputSchemaDict: [String: Any] =
+                    if let schema = tool.inputSchema {
+                        try JSONSerialization.jsonObject(
+                            with: JSONEncoder().encode(schema)
+                        ) as? [String: Any] ?? [:]
+                    } else {
+                        [:]
+                    }
 
                 let toolDict: [String: Any] = [
                     "name": tool.name,
@@ -205,20 +206,15 @@ public class MCPViewModel: ObservableObject {
                                 finalResponse += text
                                 assistantMessageContent.append(item)
 
-                                // Update UI with partial response
                                 await MainActor.run {
-                                    // Set isTyping to false as soon as we start getting responses
                                     isTyping = false
 
                                     if let lastMessage = messages.last, !lastMessage.isUser {
-                                        // If there's a tool response after this, we'll keep messages separate
                                         if content.count > 1,
                                            content[1]["type"] as? String == "tool_use"
                                         {
-                                            // Keep as a separate message
                                             messages[messages.count - 1].content += text
                                         } else {
-                                            // No tool coming, just append
                                             messages[messages.count - 1].content += text
                                         }
                                     } else {
@@ -251,33 +247,26 @@ public class MCPViewModel: ObservableObject {
                                         }
                                     }
 
-                                    // Format the tool response with indentation
                                     let formattedToolResponse =
                                         toolResponseText
                                             .split(separator: "\n")
-                                            .map { "  \($0)" } // Add 4 spaces of indentation
+                                            .map { "  \($0)" }
                                             .joined(separator: "\n")
 
-                                    finalResponse += "\n\(formattedToolResponse) "
+                                    finalResponse += "\n\(formattedToolResponse)\n"
                                     assistantMessageContent.append(item)
 
-                                    // Update UI with the tool call message
                                     await MainActor.run {
-                                        // Set isTyping to false as we're getting a response
                                         isTyping = false
 
                                         if let lastMessage = messages.last, !lastMessage.isUser {
-                                            // Keep the assistant's message as is
                                         } else {
-                                            // This shouldn't happen, but just in case
                                             messages.append(
                                                 MCPMessage(
                                                     content: "Using tool: \(toolName)",
                                                     isUser: false
                                                 ))
                                         }
-
-                                        // Add a separate message for the tool response with indentation
                                         messages.append(
                                             MCPMessage(
                                                 content: formattedToolResponse, isUser: false
@@ -288,14 +277,12 @@ public class MCPViewModel: ObservableObject {
                                         "role": "assistant",
                                         "content": assistantMessageContent,
                                     ])
-
-                                    // Add tool result with proper tool_result block
                                     anthropicMessages.append([
                                         "role": "user",
                                         "content": [
                                             [
                                                 "type": "tool_result",
-                                                "tool_use_id": toolId, // Use tool_use_id as required by the API
+                                                "tool_use_id": toolId,
                                                 "content": formattedToolResponse,
                                             ],
                                         ],
@@ -338,7 +325,6 @@ public class MCPViewModel: ObservableObject {
                 isTyping = false
                 isLoading = false
             }
-
             if let urlError = error as? URLError {
                 logger.error(
                     "Network error: \(urlError.code.rawValue), \(urlError.localizedDescription)")
